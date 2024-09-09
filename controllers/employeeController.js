@@ -6,11 +6,12 @@ const { EmpModel } = require('../models/employeeSchema');
 const { CasualLeave } = require('../models/casualLeaveSchema');
 const { PrivelageLeave } = require('../models/privelageLeaveSchema');
 const { PaternityLeave } = require('../models/paternityLeaveSchema');
+const { AdoptionLeave } = require('../models/adoptionLeaveModel');
 
 // Signup
 const Register = async (req, res) => {
     try {
-        const { empId, empName, empMail, role, designation, reportionManager, dateOfJoining, function: empFunction, department, level, location, isPaternity, permissionEligible, permissionAvailed } = req.body;
+        const { empId, empName, empMail, role, manager, designation, reportionManager, dateOfJoining, function: empFunction, department, level, location, isAdpt, isPaternity, permissionEligible, permissionAvailed } = req.body;
 
         // Check if employee already exists
         const existingEmployee = await EmpModel.findOne({ empId });
@@ -24,6 +25,7 @@ const Register = async (req, res) => {
             empName,
             empMail,
             role,
+            manager,
             designation,
             reportionManager,
             dateOfJoining,
@@ -32,6 +34,7 @@ const Register = async (req, res) => {
             level,
             location,
             isPaternity,
+            isAdpt,
             permissionEligible,
             permissionAvailed
         });
@@ -44,6 +47,17 @@ const Register = async (req, res) => {
                 totalEligibility: 5,
                 closingBalance: 5,
                 futureClosingBalance: 5
+            })
+        }
+
+        if(isAdpt){
+            const pl = new AdoptionLeave({
+                empId,
+                opBalance: 42,
+                eligibility: 42,
+                totalEligibility: 42,
+                closingBalance: 42,
+                futureClosingBalance: 42
             })
         }
 

@@ -39,7 +39,7 @@ const schema = new db.Schema(
         status: {
             type: String,
             required: true,
-            enum: ['Pending', 'Approved', 'Denied'],
+            enum: ['Pending', 'Approved', 'Denied', 'Withdrawn'],
             default: 'Pending'
         }
     },

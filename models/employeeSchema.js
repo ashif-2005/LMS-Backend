@@ -21,6 +21,10 @@ const schema = new db.Schema(
             enum: ['Admin', 'Manager', '3P', 'GVR'],
             default: '3P'
         },
+        manager: {
+            type: String,
+            required: true
+        },
         designation: {
             type: String,
             required: true
@@ -50,6 +54,10 @@ const schema = new db.Schema(
             required: true
         },
         isPaternity: {
+            type: Boolean,
+            default: false
+        },
+        isAdpt: {
             type: Boolean,
             default: false
         },

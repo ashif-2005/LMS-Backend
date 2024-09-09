@@ -224,16 +224,20 @@ const AcceptLeave = async (req, res) => {
             const filePath = path.join(__dirname, "../view/alreadyRejected.html");
             res.sendFile(filePath);
         }
+        else if(leave.status === 'Withdrawn'){
+            const filePath = path.join(__dirname, "../view/withdraw.html"); //backend\view\withdraw.html
+            res.sendFile(filePath);
+        }
         else{
             if(leave.leaveType === "Casual Leave" && leave.role === '3P'){
                 console.log("CL")
                 const cl = await CasualLeave.findOne({empId: leave.empId})
-                cl.availed += 1;
+                cl.availed += leave.numberOfDays;
                 cl.LOP += leave.LOP;
-                cl.eligibility -= 1;
-                cl.totalEligibility -= 1;
-                cl.closingBalance -= 1;
-                cl.futureClosingBalance -= 1;
+                cl.eligibility -= leave.numberOfDays;
+                cl.totalEligibility -= leave.numberOfDays;
+                cl.closingBalance -= leave.numberOfDays;
+                cl.futureClosingBalance -= leave.numberOfDays;
                 await cl.save()
             }
             else if(leave.leaveType === "Casual Leave" && leave.role === 'GVR'){
@@ -261,12 +265,12 @@ const AcceptLeave = async (req, res) => {
             }
             else{
                 const pl = await PaternityLeave.findOne({empId: leave.empId})
-                pl.availed += 1;
+                pl.availed += leave.numberOfDays;
                 pl.LOP += leave.LOP;
-                pl.eligibility -= 1;
-                pl.totalEligibility -= 1;
-                pl.closingBalance -= 1;
-                pl.futureClosingBalance -= 1;
+                pl.eligibility -= leave.numberOfDays;
+                pl.totalEligibility -= leave.numberOfDays;
+                pl.closingBalance -= leave.numberOfDays;
+                pl.futureClosingBalance -= leave.numberOfDays;
                 await pl.save()
             }
             if(leave.status === 'Pending'){
@@ -299,16 +303,19 @@ const Accept = async (req, res) => {
             res.status(202).json({ message: 'Already Rejected' });
 
         }
+        else if(leave.status === 'Withdrawn'){
+            res.status(202).json({ message: 'Already Withdrawn' });
+        }
         else{
             if(leave.leaveType === "Casual Leave" && leave.role === '3P'){
                 console.log("CL")
                 const cl = await CasualLeave.findOne({empId: leave.empId})
-                cl.availed += 1;
+                cl.availed += leave.numberOfDays;
                 cl.LOP += leave.LOP;
-                cl.eligibility -= 1;
-                cl.totalEligibility -= 1;
-                cl.closingBalance -= 1;
-                cl.futureClosingBalance -= 1;
+                cl.eligibility -= leave.numberOfDays;
+                cl.totalEligibility -= leave.numberOfDays;
+                cl.closingBalance -= leave.numberOfDays;
+                cl.futureClosingBalance -= leave.numberOfDays;
                 await cl.save()
             }
             else if(leave.leaveType === "Casual Leave" && leave.role === 'GVR'){
@@ -336,12 +343,12 @@ const Accept = async (req, res) => {
             }
             else{
                 const pl = await PaternityLeave.findOne({empId: leave.empId})
-                pl.availed += 1;
+                pl.availed += leave.numberOfDays;
                 pl.LOP += leave.LOP;
-                pl.eligibility -= 1;
-                pl.totalEligibility -= 1;
-                pl.closingBalance -= 1;
-                pl.futureClosingBalance -= 1;
+                pl.eligibility -= leave.numberOfDays;
+                pl.totalEligibility -= leave.numberOfDays;
+                pl.closingBalance -= leave.numberOfDays;
+                pl.futureClosingBalance -= leave.numberOfDays;
                 await pl.save()
             }
             if(leave.status === 'Pending'){
@@ -375,6 +382,10 @@ const DenyLeave = async (req, res) => {
             const filePath = path.join(__dirname, "../view/alreadyRejected.html");
             res.sendFile(filePath);
         }
+        else if(leave.status === 'Withdrawn'){
+            const filePath = path.join(__dirname, "../view/withdraw.html"); //backend\view\withdraw.html
+            res.sendFile(filePath);
+        }
         else{
             leave.status = 'Denied';
             await leave.save();
@@ -403,6 +414,9 @@ const Deny = async (req, res) => {
         else if(leave.status === 'Approved'){
             res.status(202).json({ message: 'Already Accepted' });
         }
+        else if(leave.status === 'Withdrawn'){
+            res.status(202).json({ message: 'Already Withdrawn' });
+        }
         else{
             leave.status = 'Denied';
             await leave.save();
@@ -421,7 +435,6 @@ const checkLeave = async(req, res) => {
     try{
         const { empId, role, leaveType, from, numberOfDays } = req.body
         console.log(from.date.slice(0,2))
-        console.log(from.secondHalf)
         const fromData = await LeaveModel.find({empId: empId, "from.date": from.date, "from.firstHalf": true})
         const toData = await LeaveModel.find({empId: empId, "to.date": from.date, "to.firstHalf": true})
         const From = await LeaveModel.find({empId: empId, "from.date": from.date, "from.secondHalf": true})
@@ -439,13 +452,21 @@ const checkLeave = async(req, res) => {
             return res.status(202).json({ mesasage: "Already leave had applied in the same day" })
         }
 
+        console.log(numberOfDays >= 1)
+
         if(role === '3P'){
+            console.log(role)
             const cl = await CasualLeave.findOne({empId: empId})
-            if(numberOfDays >= 1 && cl.availed === 0){
+            if(cl.availed >= 1){
+                res.status(200).json({ CL: 0, LOP: numberOfDays })
+            }
+            else if(numberOfDays > 1 && cl.availed === 0){
+                console.log("****",numberOfDays)
                 res.status(200).json({ CL: 1, LOP: numberOfDays-1 })
             }
-            else if(numberOfDays >= 1 && cl.availed !== 0){
-                res.status(200).json({ CL: 0, LOP: numberOfDays })
+            else if(numberOfDays > 0 && cl.availed === 0.5){
+                console.log("----",numberOfDays)
+                res.status(200).json({ CL: 0.5, LOP: numberOfDays-0.5 })
             }
             else{
                 res.status(200).json({ CL: 1, LOP: 0 })

@@ -56,6 +56,10 @@ const AcceptPermission = async (req, res) => {
             const filePath = path.join(__dirname, "../view/alreadyRejected.html");
             res.sendFile(filePath);
         }
+        else if(permission.status === 'Withdrawn'){
+            const filePath = path.join(__dirname, "../view/withdraw.html"); //backend\view\withdraw.html
+            res.sendFile(filePath);
+        }
         else{
             emp.permissionAvailed += permission.hrs;
             emp.permissionEligible -= permission.hrs;
@@ -84,7 +88,16 @@ const Accept = async (req, res) => {
         const emp = await EmpModel.findOne({empId: permission.empId});
         console.log(emp);
 
-        if(permission.status === 'Pending'){
+        if (permission.status === 'Approved'){
+            res.status(202).json({ message: 'Permission request has already been approved' });
+        }
+        else if(permission.status === 'Denied'){
+            res.status(202).json({ message: 'Permission request has already been denied' });
+        }
+        else if(permission.status === 'Withdrawn'){
+            res.status(202).json({ message: 'Permission request has already been withdrawn' });
+        }
+        else{
             emp.permissionAvailed += permission.hrs;
             emp.permissionEligible -= permission.hrs;
             permission.status = 'Approved';
@@ -92,9 +105,6 @@ const Accept = async (req, res) => {
             await emp.save();
             Accepted('lingeshwaran.kv2022cse@sece.ac.in')
             res.status(200).json({ message: 'Permission approved successfully', permission });
-        }
-        else{
-            return res.status(403).json({ message: 'Permission already approved or denied' });
         }
     } catch (error) {
         res.status(500).json({ message: 'Server error', error });
@@ -117,6 +127,10 @@ const DenyPermission = async (req, res) => {
         }
         else if(permission.status === 'Denied'){
             const filePath = path.join(__dirname, "../view/alreadyRejected.html");
+            res.sendFile(filePath);
+        }
+        else if(permission.status === 'Withdrawn'){
+            const filePath = path.join(__dirname, "../view/withdraw.html"); //backend\view\withdraw.html
             res.sendFile(filePath);
         }
         else{
@@ -146,6 +160,9 @@ const Deny = async (req, res) => {
         else if(permission.status === 'Denied'){
             res.status(202).json({ message: 'Permission request has already been denied' });
         }
+        else if(permission.status === 'Withdrawn'){
+            res.status(202).json({ message: 'Permission request has already been withdrawn' });
+        }
         else{
             permission.status = 'Denied';
             await permission.save();
@@ -158,7 +175,7 @@ const Deny = async (req, res) => {
 }
 const checkPermission = async(req, res) => {
     try{
-        const { empId, date, hrs } = req.body;
+        const { empId, date, session, hrs } = req.body;
         const fromData = await LeaveModel.find({empId: empId, "from.date": date, "from.firstHalf": true})
         const toData = await LeaveModel.find({empId: empId, "to.date": date, "to.firstHalf": true})
         const From = await LeaveModel.find({empId: empId, "from.date": date, "from.secondHalf": true})
@@ -168,8 +185,16 @@ const checkPermission = async(req, res) => {
         if(data.length){
             return res.status(202).json({ mesasage: "Already permission had applied in the same day" })
         }
-        if(fromData.length || toData.length || From.length || To.length || per.length){
+
+        if(per.length){
             return res.status(202).json({ mesasage: "Already permission had applied in the same day"})
+        }
+
+        if(session.firstHalf && (fromData.length || toData.length)){
+            return res.status(202).json({ mesasage: "Already leave had applied in the same day" })
+        }
+        else if(session.secondHalf && (From.length || To.length)){
+            return res.status(202).json({ mesasage: "Already leave had applied in the same day" })
         }
         else{
             const emp = await EmpModel.findOne({empId})
