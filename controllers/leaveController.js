@@ -464,9 +464,9 @@ const checkLeave = async(req, res) => {
                 console.log("****",numberOfDays)
                 res.status(200).json({ CL: 1, LOP: numberOfDays-1 })
             }
-            else if(numberOfDays > 0 && cl.availed === 0.5){
+            else if(numberOfDays < 1){
                 console.log("----",numberOfDays)
-                res.status(200).json({ CL: 0.5, LOP: numberOfDays-0.5 })
+                res.status(200).json({ CL: 0.5, LOP: 0 })
             }
             else{
                 res.status(200).json({ CL: 1, LOP: 0 })
