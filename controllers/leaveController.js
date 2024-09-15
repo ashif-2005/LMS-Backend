@@ -4,7 +4,8 @@ const { EmpModel } = require('../models/employeeSchema');
 const { CasualLeave } = require('../models/casualLeaveSchema');
 const { PrivelageLeave } = require('../models/privelageLeaveSchema');
 const { PaternityLeave } = require('../models/paternityLeaveSchema');
-const { Accepted, Rejected } = require('../utils/AdminResponseLeave')
+const { Accepted, Rejected } = require('../utils/AdminResponseLeave');
+const { AdoptionLeave } = require('../models/adoptionLeaveModel');
 
 // Apply for leave
 const ApplyLeave = async (req, res) => {
@@ -176,34 +177,6 @@ const updateStatus = async(req, res)=> {
     }
 }
 
-// const LOP = async(req, res) => {
-//     try{
-//         const { empId, leaveType, from, to, numberOfDays, reason } = req.body;
-     
-
-//         const emp = await EmpModel.findOne({empId});
-
-//         if (!emp) {
-//             return res.status(404).json({ message: 'Employee not found' });
-//         }
-//         const leave = new LeaveModel({
-//             empId,
-//             empName: emp.empName,
-//             role: emp.role,
-//             leaveType,
-//             from,
-//             to,
-//             numberOfDays,
-//             reason,
-//             isLOP: true
-//         })
-//         await leave.save()
-//         res.status(201).json({ message: 'LOP Leave applied successfully', leave });
-//     } catch(err){
-//         res.status(500).json({ message: 'Server error', err });
-//     }
-// }
-
 // Accept leave
 const AcceptLeave = async (req, res) => {
     try {
@@ -234,10 +207,7 @@ const AcceptLeave = async (req, res) => {
                 const cl = await CasualLeave.findOne({empId: leave.empId})
                 cl.availed += leave.numberOfDays;
                 cl.LOP += leave.LOP;
-                cl.eligibility -= leave.numberOfDays;
-                cl.totalEligibility -= leave.numberOfDays;
                 cl.closingBalance -= leave.numberOfDays;
-                cl.futureClosingBalance -= leave.numberOfDays;
                 await cl.save()
             }
             else if(leave.leaveType === "Casual Leave" && leave.role === 'GVR'){
@@ -245,33 +215,31 @@ const AcceptLeave = async (req, res) => {
                 const cl = await CasualLeave.findOne({empId: leave.empId})
                 cl.availed += leave.numberOfDays;
                 cl.LOP += leave.LOP;
-                cl.eligibility -= leave.numberOfDays;
-                cl.totalEligibility -= leave.numberOfDays;
                 cl.closingBalance -= leave.numberOfDays;
                 cl.carryForward -= leave.numberOfDays;
-                cl.futureClosingBalance -= leave.numberOfDays;
                 await cl.save()
             }
             else if(leave.leaveType === "Privelage Leave"){
                 const pl = await PrivelageLeave.findOne({empId: leave.empId})
                 pl.availed += leave.numberOfDays;
                 pl.LOP += leave.LOP;
-                pl.eligibility -= leave.numberOfDays;
-                pl.totalEligibility -= leave.numberOfDays;
                 pl.closingBalance -= leave.numberOfDays;
                 pl.carryForward -= leave.numberOfDays;
-                pl.futureClosingBalance -= leave.numberOfDays;
                 await pl.save()
             }
-            else{
+            else if(leave.leaveType === 'Paternity Leave'){
                 const pl = await PaternityLeave.findOne({empId: leave.empId})
                 pl.availed += leave.numberOfDays;
                 pl.LOP += leave.LOP;
-                pl.eligibility -= leave.numberOfDays;
-                pl.totalEligibility -= leave.numberOfDays;
                 pl.closingBalance -= leave.numberOfDays;
-                pl.futureClosingBalance -= leave.numberOfDays;
                 await pl.save()
+            }
+            else{
+                const atpt = await AdoptionLeave.findById({empId: leave.empId})
+                adpt.availed += leave.numberOfDays;
+                adpt.LOP += leave.LOP;
+                adpt.closingBalance -= leave.numberOfDays;
+                adpt.save();
             }
             if(leave.status === 'Pending'){
                 leave.status = 'Approved';
@@ -312,10 +280,7 @@ const Accept = async (req, res) => {
                 const cl = await CasualLeave.findOne({empId: leave.empId})
                 cl.availed += leave.numberOfDays;
                 cl.LOP += leave.LOP;
-                cl.eligibility -= leave.numberOfDays;
-                cl.totalEligibility -= leave.numberOfDays;
                 cl.closingBalance -= leave.numberOfDays;
-                cl.futureClosingBalance -= leave.numberOfDays;
                 await cl.save()
             }
             else if(leave.leaveType === "Casual Leave" && leave.role === 'GVR'){
@@ -323,33 +288,31 @@ const Accept = async (req, res) => {
                 const cl = await CasualLeave.findOne({empId: leave.empId})
                 cl.availed += leave.numberOfDays;
                 cl.LOP += leave.LOP;
-                cl.eligibility -= leave.numberOfDays;
-                cl.totalEligibility -= leave.numberOfDays;
                 cl.closingBalance -= leave.numberOfDays;
                 cl.carryForward -= leave.numberOfDays;
-                cl.futureClosingBalance -= leave.numberOfDays;
                 await cl.save()
             }
             else if(leave.leaveType === "Privelage Leave"){
                 const pl = await PrivelageLeave.findOne({empId: leave.empId})
                 pl.availed += leave.numberOfDays;
                 pl.LOP += leave.LOP;
-                pl.eligibility -= leave.numberOfDays;
-                pl.totalEligibility -= leave.numberOfDays;
                 pl.closingBalance -= leave.numberOfDays;
                 pl.carryForward -= leave.numberOfDays;
-                pl.futureClosingBalance -= leave.numberOfDays;
                 await pl.save()
             }
-            else{
+            else if(leave.leaveType === 'Paternity Leave'){
                 const pl = await PaternityLeave.findOne({empId: leave.empId})
                 pl.availed += leave.numberOfDays;
                 pl.LOP += leave.LOP;
-                pl.eligibility -= leave.numberOfDays;
-                pl.totalEligibility -= leave.numberOfDays;
                 pl.closingBalance -= leave.numberOfDays;
-                pl.futureClosingBalance -= leave.numberOfDays;
                 await pl.save()
+            }
+            else{
+                const atpt = await AdoptionLeave.findById({empId: leave.empId})
+                adpt.availed += leave.numberOfDays;
+                adpt.LOP += leave.LOP;
+                adpt.closingBalance -= leave.numberOfDays;
+                adpt.save();
             }
             if(leave.status === 'Pending'){
                 leave.status = 'Approved';
@@ -476,8 +439,8 @@ const checkLeave = async(req, res) => {
             if(leaveType === 'Casual Leave'){
                 const cl = await CasualLeave.findOne({empId: empId})
                 console.log(cl)
-                if(numberOfDays >= cl.eligibility){
-                    res.status(200).json({ CL: cl.eligibility, LOP: numberOfDays-cl.eligibility })
+                if(numberOfDays >= cl.closingBalance){
+                    res.status(200).json({ CL: cl.closingBalance, LOP: numberOfDays-cl.closingBalance })
                 }
                 else{
                     res.status(200).json({ CL: numberOfDays, LOP: 0 })
@@ -487,20 +450,29 @@ const checkLeave = async(req, res) => {
                 console.log("check")
                 const pl = await PrivelageLeave.findOne({empId: empId})
                 console.log(pl)
-                if(numberOfDays >= pl.eligibility){
-                    res.status(200).json({ PL: pl.eligibility, LOP: numberOfDays-pl.eligibility })
+                if(numberOfDays >= pl.closingBalance){
+                    res.status(200).json({ PL: pl.closingBalance, LOP: numberOfDays-pl.closingBalance })
                 }
                 else{
                     res.status(200).json({ PL: numberOfDays, LOP: 0 })
                 }
             }
-            else{
+            else if(leaveType === 'Paternity Leave'){
                 const pl = await PaternityLeave.findOne({empId: empId})
-                if(numberOfDays >= 1){
-                    res.status(200).json({ PL: pl.eligibility, LOP: numberOfDays-pl.eligibility })
+                if(numberOfDays >= pl.x){
+                    res.status(200).json({ PAL: pl.closingBalance, LOP: numberOfDays-pl.closingBalance })
                 }
                 else{
-                    res.status(200).json({ PL: numberOfDays, LOP: 0 })
+                    res.status(200).json({ PAL: numberOfDays, LOP: 0 })
+                }
+            }
+            else{
+                const adpt = await AdoptionLeave.findOne({empId: empId})
+                if(numberOfDays > adpt.closingBalance){
+                    res.status(200).json({ ADPT: adpt.closingBalance, LOP: numberOfDays-adpt.closingBalance })
+                }
+                else{
+                    res.status(200).json({ ADPT: numberOfDays, LOP: 0 })
                 }
             }
         }

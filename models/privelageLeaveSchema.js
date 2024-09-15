@@ -10,7 +10,7 @@ const schema = new db.Schema(
             type: Number,
             default: 0
         },
-        eligibility: {
+        credit: {
             type: Number,
             default: 0
         },
@@ -39,14 +39,6 @@ const schema = new db.Schema(
             default: 0
         },
         carryForward: {
-            type: Number,
-            default: 0
-        },
-        futureAvailed: {
-            type: Number,
-            default: 0
-        },
-        futureClosingBalance: {
             type: Number,
             default: 0
         }

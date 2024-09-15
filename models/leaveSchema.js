@@ -17,7 +17,7 @@ const schema = new db.Schema(
         },
         leaveType: {
             type: String,
-            enum: ['Casual Leave', 'Privilege Leave', 'Paternity Leave'],
+            enum: ['Casual Leave', 'Privilege Leave', 'Paternity Leave', 'Adoption Leave'],
             default: 'Casual Leave'
         },
         from: {

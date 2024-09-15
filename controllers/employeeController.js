@@ -11,7 +11,7 @@ const { AdoptionLeave } = require('../models/adoptionLeaveModel');
 // Signup
 const Register = async (req, res) => {
     try {
-        const { empId, empName, empMail, role, manager, designation, reportionManager, dateOfJoining, function: empFunction, department, level, location, isAdpt, isPaternity, permissionEligible, permissionAvailed } = req.body;
+        const { empId, empName, empMail, empPhone, role, manager, designation, reportionManager, dateOfJoining, function: empFunction, department, level, location, isAdpt, isPaternity, permissionEligible, permissionAvailed } = req.body;
 
         // Check if employee already exists
         const existingEmployee = await EmpModel.findOne({ empId });
@@ -24,6 +24,7 @@ const Register = async (req, res) => {
             empId,
             empName,
             empMail,
+            empPhone,
             role,
             manager,
             designation,
@@ -42,33 +43,32 @@ const Register = async (req, res) => {
         if(isPaternity){
             const paternity = new PaternityLeave({
                 empId,
-                opBalance: 5,
-                eligibility: 5,
+                opBalance: 0,
+                credit: 5,
                 totalEligibility: 5,
-                closingBalance: 5,
-                futureClosingBalance: 5
+                closingBalance: 5
             })
+            await paternity.save()
         }
 
         if(isAdpt){
-            const pl = new AdoptionLeave({
+            const Adpt = new AdoptionLeave({
                 empId,
-                opBalance: 42,
-                eligibility: 42,
+                opBalance: 0,
+                credit: 42,
                 totalEligibility: 42,
-                closingBalance: 42,
-                futureClosingBalance: 42
+                closingBalance: 42
             })
+            await Adpt.save()
         }
 
         if(role === "3P"){
             const cl = new CasualLeave({
                 empId,
-                opBalance: 12,
-                eligibility: 12,
+                opBalance: 0,
+                credit: 12,
                 totalEligibility: 12,
-                closingBalance: 12,
-                futureClosingBalance: 12
+                closingBalance: 12
             })
 
             await cl.save()
@@ -76,22 +76,19 @@ const Register = async (req, res) => {
         else if(role === "GVR"){
             const cl = new CasualLeave({
                 empId,
-                opBalance: 10,
-                eligibility: 10,
+                opBalance: 0,
+                credit: 10,
                 totalEligibility: 10,
-                closingBalance: 10,
-                carryForward: 10,
-                futureClosingBalance: 10
+                closingBalance: 10
             })
 
             const pl = new PrivelageLeave({
                 empId,
-                opBalance: 16,
-                eligibility: 16,
+                opBalance: 0,
+                credit: 16,
                 totalEligibility: 16,
                 closingBalance: 16,
-                carryForward: 16,
-                futureClosingBalance: 16
+                carryForward: 16
             })
 
             await cl.save()

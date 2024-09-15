@@ -16,9 +16,14 @@ const schema = new db.Schema(
             required: true,
             unique: true
         },
+        empPhone: {
+            type: String,
+            required: true,
+            unique: true
+        },
         role: {
             type: String,
-            enum: ['Admin', 'Manager', '3P', 'GVR'],
+            enum: ['Admin', 'Manager', '3P', 'GVR', 'HR'],
             default: '3P'
         },
         manager: {
