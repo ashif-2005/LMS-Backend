@@ -10,7 +10,7 @@ const schema = new db.Schema(
             type: Number,
             default: 0
         },
-        cedit: {
+        credit: {
             type: Number,
             default: 0
         },

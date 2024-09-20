@@ -159,4 +159,20 @@ const GetEmp = async (req, res) => {
     }
 }
 
-module.exports = {Register,RFIDLogin,GetEmp}
+const getAllEmp = async(req, res) => {
+    try{
+        const employee = await EmpModel.findOne({"empId": req.body.empId})
+        if(employee.role === "Manager"){
+            const emp = await EmpModel.find({manager: employee.empName});
+            res.status(200).json(emp);
+        }
+        else{
+            res.status(400).json({message: "Permission Denied"})
+        }
+    }
+    catch(err){
+        res.status(500).json({message: "Server Error", error: err})
+    }
+}
+
+module.exports = {Register,RFIDLogin,GetEmp, getAllEmp}

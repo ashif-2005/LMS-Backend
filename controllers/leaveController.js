@@ -6,6 +6,7 @@ const { PrivelageLeave } = require('../models/privelageLeaveSchema');
 const { PaternityLeave } = require('../models/paternityLeaveSchema');
 const { Accepted, Rejected } = require('../utils/AdminResponseLeave');
 const { AdoptionLeave } = require('../models/adoptionLeaveModel');
+const { Message } = require('../utils/message');
 
 // Apply for leave
 const ApplyLeave = async (req, res) => {
@@ -247,6 +248,7 @@ const AcceptLeave = async (req, res) => {
                 const filePath = path.join(__dirname, "../view/accept.html");
                 const emp = await EmpModel.findOne({empId: leave.empId})
                 Accepted('mohammedashif.a2022cse@sece.ac.in')
+                Message(emp.empPhone, `Dear ${emp.empName},\n\nYour leave has been *ACCEPTED* ✅\n*Leave Type:* ${leave.leaveType}\n*Start Date:* ${leave.from.date}\n*Number of Days:* ${leave.numberOfDays}\n\nPlease ensure that all pending tasks are handed over to the appropriate team members before your leave.\n\nBest Regards,\n*Gilbarco Veeder-Root*`)
                 res.sendFile(filePath);
             }
         }
@@ -319,6 +321,7 @@ const Accept = async (req, res) => {
                 await leave.save();
                 const emp = await EmpModel.findOne({empId: leave.empId})
                 Accepted('mohammedashif.a2022cse@sece.ac.in')
+                Message(emp.empPhone, `Dear ${emp.empName},\n\nYour leave has been *ACCEPTED* ✅.\n*Leave Type:* ${leave.leaveType}\n*Start Date:* ${leave.from.date}\n*Number of Days:* ${leave.numberOfDays}\n\nPlease ensure that all pending tasks are handed over to the appropriate team members before your leave.\n\nBest Regards,\n*Gilbarco Veeder-Root*`)
                 res.status(200).json({ message: 'Leave approved successfully', leave });
             }
         }
@@ -356,6 +359,7 @@ const DenyLeave = async (req, res) => {
             const emp = await EmpModel.findOne({empId: leave.empId})
             // Rejected(emp.empMail)
             Rejected('mohammedashif.a2022cse@sece.ac.in')
+            Message(emp.empPhone, `Dear ${emp.empName},\n\nYour leave has been *REJECTED* ❌.\n*Leave Type:* ${leave.leaveType}\n*Start Date:* ${leave.from.date}\n*Number of Days:* ${leave.numberOfDays}\n\nPlease ensure that all pending tasks are handed over to the appropriate team members before your leave.\n\nBest Regards,\n*Gilbarco Veeder-Root*`)
             res.sendFile(filePath);
         }
     } catch (error) {
@@ -386,6 +390,7 @@ const Deny = async (req, res) => {
             const emp = await EmpModel.findOne({empId: leave.empId})
             console.log(emp.empMail)
             Rejected('mohammedashif.a2022cse@sece.ac.in')
+            Message(emp.empPhone, `Dear ${emp.empName},\n\nYour leave has been *REJECTED* ❌.\n*Leave Type:* ${leave.leaveType}\n*Start Date:* ${leave.from.date}\n*Number of Days:* ${leave.numberOfDays}\n\nPlease ensure that all pending tasks are handed over to the appropriate team members before your leave.\n\nBest Regards,\n*Gilbarco Veeder-Root*`)
             res.status(200).json({ message: 'Leave denied successfully', leave });
         }
         
