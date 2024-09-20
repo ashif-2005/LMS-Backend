@@ -1,9 +1,7 @@
 const twilio = require('twilio');
 
-// Twilio credentials
-const accountSid = 'AC52f0dd420b4a94411f9f989cf7749e69'; // Your Account SID from www.twilio.com/console
-const authToken = '5ba053a83612b047809b9498ecaff4a5';   // Your Auth Token from www.twilio.com/console
-const client = new twilio(accountSid, authToken);
+// Twilio credentials   
+const client = new twilio(process.env.SID, process.env.Token);
 
 const Message = async(to, message) => {
     try {
