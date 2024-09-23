@@ -3,6 +3,7 @@ const { EmpModel } = require('../models/employeeSchema');
 const { LeaveModel } = require('../models/leaveSchema');
 const { PermissionModel } = require('../models/permissionSchem'); // Replace with the correct path
 const { Accepted, Rejected } = require('../utils/AdminResponseLeave')
+const { Message } = require('../utils/message');
 
 // Apply for permission
 const ApplyPermission = async (req, res) => {
@@ -66,8 +67,10 @@ const AcceptPermission = async (req, res) => {
             permission.status = 'Approved';
             await permission.save();
             await emp.save();
+            console.log(__dirname)
             const filePath = path.join(__dirname, "../view/accept.html");
             Accepted('lingeshwaran.kv2022cse@sece.ac.in')
+            Message(emp.empPhone, `Dear ${emp.empName},\n\nYour Permission has been *ACCEPTED* ✅\n*Date:* ${permission.date}\n*From:* ${permission.from}\n*To:* ${permission.to}\n*Hours:* ${permission.hrs}\n\nPlease ensure that all pending tasks are handed over to the appropriate team members before your permission.\n\nBest Regards,\n*Gilbarco Veeder-Root*`)
             res.sendFile(filePath);
             // res.status(200).json({message: "Permission granted"})
         }
@@ -104,6 +107,7 @@ const Accept = async (req, res) => {
             await permission.save();
             await emp.save();
             Accepted('lingeshwaran.kv2022cse@sece.ac.in')
+            Message(emp.empPhone, `Dear ${emp.empName},\n\nYour Permission has been *ACCEPTED* ✅\n*Date:* ${permission.date}\n*From:* ${permission.from}\n*To:*${permission.to}\n*Hours:*${permission.hrs}\n\nPlease ensure that all pending tasks are handed over to the appropriate team members before your permission.\n\nBest Regards,\n*Gilbarco Veeder-Root*`)
             res.status(200).json({ message: 'Permission approved successfully', permission });
         }
     } catch (error) {
@@ -138,6 +142,7 @@ const DenyPermission = async (req, res) => {
             await permission.save();
             const filePath = path.join(__dirname, "../view/reject.html");
             Rejected('lingeshwaran.kv2022cse@sece.ac.in')
+            Message(emp.empPhone, `Dear ${emp.empName},\n\nYour Permission has been *REJECTED* ❌\n*Date:* ${permission.date}\n*From:* ${permission.from}\n*To:*${permission.to}\n*Hours:*${permission.hrs}\n\nPlease ensure that all pending tasks are handed over to the appropriate team members before your permission.\n\nBest Regards,\n*Gilbarco Veeder-Root*`)
             res.sendFile(filePath);
         }
     } catch (error) {
@@ -167,6 +172,7 @@ const Deny = async (req, res) => {
             permission.status = 'Denied';
             await permission.save();
             Rejected('lingeshwaran.kv2022cse@sece.ac.in')
+            Message(emp.empPhone, `Dear ${emp.empName},\n\nYour Permission has been *REJECTED* ❌\n*Date:* ${permission.date}\n*From:* ${permission.from}\n*To:*${permission.to}\n*Hours:*${permission.hrs}\n\nPlease ensure that all pending tasks are handed over to the appropriate team members before your permission.\n\nBest Regards,\n*Gilbarco Veeder-Root*`)
             res.status(200).json({ message: 'Permission denied successfully', permission });
         }
     } catch (error) {

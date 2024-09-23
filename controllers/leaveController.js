@@ -12,7 +12,7 @@ const { Message } = require('../utils/message');
 const ApplyLeave = async (req, res) => {
     try {
         // console.log(req.body)
-        const { empId, leaveType, from, to, numberOfDays, reasonType, reason, LOP } = req.body;
+        const { empId, leaveType, from, to, numberOfDays, leaveDays, reasonType, reason, LOP } = req.body;
         var list = []
 
         for(let i = parseInt(from.date.slice(0,2))+1; i < parseInt(to.date.slice(0,2)); i++) {
@@ -43,6 +43,7 @@ const ApplyLeave = async (req, res) => {
                         from,
                         to,
                         numberOfDays,
+                        leaveDays,
                         days: list,
                         reasonType,
                         reason,
@@ -61,6 +62,7 @@ const ApplyLeave = async (req, res) => {
                         from,
                         to,
                         numberOfDays,
+                        leaveDays,
                         days: list,
                         reasonType,
                         reason,
@@ -84,6 +86,7 @@ const ApplyLeave = async (req, res) => {
                         from,
                         to,
                         numberOfDays,
+                        leaveDays,
                         days: list,
                         reasonType,
                         reason,
@@ -103,6 +106,7 @@ const ApplyLeave = async (req, res) => {
                         from,
                         to,
                         numberOfDays,
+                        leaveDays,
                         days: list,
                         reasonType,
                         reason,
@@ -122,6 +126,7 @@ const ApplyLeave = async (req, res) => {
                         from,
                         to,
                         numberOfDays,
+                        leaveDays,
                         days: list,
                         reasonType,
                         reason,
