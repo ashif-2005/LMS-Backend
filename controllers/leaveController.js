@@ -8,6 +8,14 @@ const { Accepted, Rejected } = require('../utils/AdminResponseLeave');
 const { AdoptionLeave } = require('../models/adoptionLeaveModel');
 const { Message } = require('../utils/message');
 
+const today = new Date();
+
+const date = today.getDate();
+
+const month = today.getMonth() + 1;
+
+const year = today.getFullYear();
+
 // Apply for leave
 const ApplyLeave = async (req, res) => {
     try {
@@ -47,6 +55,7 @@ const ApplyLeave = async (req, res) => {
                         days: list,
                         reasonType,
                         reason,
+                        today: `${year}/${month}/${date}`,
                         LOP
                     })
                     await leave.save()
@@ -66,6 +75,7 @@ const ApplyLeave = async (req, res) => {
                         days: list,
                         reasonType,
                         reason,
+                        today: `${year}/${month}/${date}`,
                         LOP
                     })
                     await leave.save()
@@ -90,6 +100,7 @@ const ApplyLeave = async (req, res) => {
                         days: list,
                         reasonType,
                         reason,
+                        today: `${year}/${month}/${date}`,
                         LOP
                     })
                     await leave.save()
@@ -110,6 +121,7 @@ const ApplyLeave = async (req, res) => {
                         days: list,
                         reasonType,
                         reason,
+                        today: `${year}/${month}/${date}`,
                         LOP
                     })
                     await leave.save()
@@ -130,6 +142,7 @@ const ApplyLeave = async (req, res) => {
                         days: list,
                         reasonType,
                         reason,
+                        today: `${year}/${month}/${date}`,
                         LOP
                     })
                     await leave.save()
@@ -513,4 +526,25 @@ const GetLeave = async (req, res) => {
     }
 }
 
-module.exports = {checkLeave,ApplyLeave,withDrawLeave,updateStatus,AcceptLeave,Accept,DenyLeave,Deny,GetLeave}
+const cardData = async(req, res) => {
+    try{
+        const leaves = await LeaveModel.find({today: `${year}/${month}/${date}`});
+        res.status(200).json(leaves);
+    }catch(err){
+        res.status(500).json({ message: "Server error", err})
+    }
+}
+
+const weakData = async(req, res) => {
+    try{
+        const leaves = await LeaveModel.find({today: {
+            $gte: `${year}/${month}/${date-7}`,
+            $lte: `${year}/${month}/${date}`
+          }});
+        res.status(200).json(leaves);
+    }catch(err){
+        res.status(500).json({ message: "Server error", err})
+    }
+}
+
+module.exports = {checkLeave,ApplyLeave,withDrawLeave,updateStatus,AcceptLeave,Accept,DenyLeave,Deny,GetLeave,cardData,weakData}

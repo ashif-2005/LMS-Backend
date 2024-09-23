@@ -55,6 +55,10 @@ const schema = new db.Schema(
             enum: ['Pending', 'Approved', 'Denied', 'Withdrawn'],
             default: 'Pending'
         },
+        today:{
+            type: String,
+            required: true
+        },
         LOP: {
             type: Number,
             default: 0
