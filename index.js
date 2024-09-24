@@ -10,11 +10,13 @@ const PermissionRoute = require('./routes/permissionRoute')
 const TableRoute = require('./routes/tableRoute')
 const Email = require('./routes/mailRoute')
 const Circular = require('./routes/circularRoute')
+const Message = require('./routes/messageRoute')
 
 const app = express()
 app.use(express.json())
 app.use(bodyParser.json())
 app.use(cors());
+app.use(express.urlencoded({ extended: true }));
    
 dotenv.config('./env')
 
@@ -24,6 +26,7 @@ app.use('/permission',PermissionRoute)
 app.use('/table',TableRoute)
 app.use('/mail', Email)
 app.use('/circular', Circular)
+app.use('/message', Message)
 
 // cron.schedule('0 0 1 2 *', () => {
 //     resetGVR();
