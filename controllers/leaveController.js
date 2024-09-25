@@ -106,7 +106,7 @@ const ApplyLeave = async (req, res) => {
                     await leave.save()
                     res.status(201).json({ message: 'Leave applied successfully', leave });
             }
-            else if(leaveType === "Privelage Leave"){
+            else if(leaveType === "Privilege Leave"){
                 const pl = await PrivelageLeave.findOne({empId})
                 if(pl.availed < 16){
                     const leave = new LeaveModel({
