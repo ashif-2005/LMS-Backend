@@ -235,7 +235,6 @@ const AcceptLeave = async (req, res) => {
                 cl.availed += leave.numberOfDays;
                 cl.LOP += leave.LOP;
                 cl.closingBalance -= leave.numberOfDays;
-                cl.carryForward -= leave.numberOfDays;
                 await cl.save()
             }
             else if(leave.leaveType === "Privelage Leave"){
@@ -309,7 +308,6 @@ const Accept = async (req, res) => {
                 cl.availed += leave.numberOfDays;
                 cl.LOP += leave.LOP;
                 cl.closingBalance -= leave.numberOfDays;
-                cl.carryForward -= leave.numberOfDays;
                 await cl.save()
             }
             else if(leave.leaveType === "Privelage Leave"){

@@ -42,7 +42,7 @@ const schema = new db.Schema(
         },
         reasonType: {
             type: String,
-            enum: ['Personal', 'Medical', 'Peternity', 'Family Function', 'Others'],
+            enum: ['Personal', 'Medical', 'Paternity', 'Family Function', 'Others'],
             default: 'Personal'
         },
         reason: {
