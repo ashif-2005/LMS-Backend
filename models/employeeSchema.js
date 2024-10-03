@@ -23,8 +23,12 @@ const schema = new db.Schema(
         },
         role: {
             type: String,
-            enum: ['Admin', 'Manager', '3P', 'GVR', 'HR'],
+            enum: ['Admin', 'Manager', '3P', 'GVR', 'HR', "Admin"],
             default: '3P'
+        },
+        employees: {
+            type: Array,
+            default: []
         },
         manager: {
             type: String,
@@ -73,7 +77,11 @@ const schema = new db.Schema(
         permissionAvailed: {
             type: Number,
             default: 0
-        }   
+        },
+        otp: {
+            type: String,
+            default: '000000'
+        }
     },
     {
         timestamps: true

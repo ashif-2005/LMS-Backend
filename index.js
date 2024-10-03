@@ -11,6 +11,7 @@ const TableRoute = require('./routes/tableRoute')
 const Email = require('./routes/mailRoute')
 const Circular = require('./routes/circularRoute')
 const Message = require('./routes/messageRoute')
+const OTP = require('./routes/otpRoute')
 
 const app = express()
 app.use(express.json())
@@ -27,6 +28,7 @@ app.use('/table',TableRoute)
 app.use('/mail', Email)
 app.use('/circular', Circular)
 app.use('/message', Message)
+app.use('/otp', OTP)
 
 // cron.schedule('0 0 1 2 *', () => {
 //     resetGVR();

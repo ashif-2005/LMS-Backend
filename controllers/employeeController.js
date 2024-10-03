@@ -40,6 +40,18 @@ const Register = async (req, res) => {
             permissionAvailed
         });
 
+        if(role === "GVR" || role === "3P"){
+            const data = await EmpModel.findOne({empName: manager})
+            if(!data){
+                return res.status(400).json({message: "Manager not found"})
+            }
+            else{
+                console.log("Adding employee...")
+                await EmpModel.findByIdAndUpdate(data._id, {$push: {employees: empPhone}})
+                console.log("employee added to the manager")
+            }
+        }
+
         if(isPaternity){
             const paternity = new PaternityLeave({
                 empId,
@@ -133,7 +145,6 @@ const RFIDLogin = async(req,res) =>{
     try {
         const { empId } = req.body;
 
-        // Find employee by ID
         const employee = await EmpModel.findOne({ empId });
         if (!employee) {
             return res.status(400).json({ message: 'Employee not found'});

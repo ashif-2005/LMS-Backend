@@ -116,7 +116,7 @@ const checkStatus = async(message, number) => {
 const unknownMessage = async(message, number) => {
     try{
         console.log("Unknown message")
-        const msg = 'Invalid command. Please use "check eligibility" or "check status".';
+        const msg = 'Invalid command. Please use "check eligibility" to check your leave eligibility or "check status" to check the status of the applied last leave.';
         const response = await client.messages.create({
             body: msg,
             from: 'whatsapp:+14155238886', // Twilio's WhatsApp number

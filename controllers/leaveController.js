@@ -146,6 +146,8 @@ const ApplyLeave = async (req, res) => {
                         LOP
                     })
                     await leave.save()
+                    const manager = await EmpModel.findOne({manager: emp.manager})
+                    Message(manager.empPhone, `Dear ${manager.empName},\n\nYou have received a new leave request from *${emp.empName}*.\n\n*Leave Details:*\n- *Leave Type:* ${leave.leaveType}\n- *Start Date:* ${leave.from.date}\n- *End Date:* ${leave.to.date}\n- *Number of Days:* ${leave.leaveDays}\n- *Leave With Pay:* ${leave.numberOfDays}\n- *Loss of Pay:* ${leave.LOP}\n\nPlease take the necessary action either through your email or by logging into the LMS.\n\nBest Regards,\n*Gilbarco Veeder-Root*`)
                     res.status(201).json({ message: 'Leave applied successfully', leave });
             }
             else{
@@ -176,15 +178,55 @@ const withDrawLeave = async(req, res) => {
     }
 }
 
-const updateStatus = async(req, res)=> {
+const RejectAccepted = async(req, res)=> {
     try{
-        const { empId, leaveId, status } = req.body;
-        const emp = await EmpModel.findOne({empId})
+        const { empId, leaveId } = req.body;
+        console.log(leaveId);
+        const leave = await LeaveModel.findById(leaveId);
+        const emp = await EmpModel.findOne({empId}) 
         if (!emp) {
             return res.status(404).json({ message: 'Employee not found' });
         }
         if(emp.role === 'Manager'){
-            const leave = await LeaveModel.findByIdAndUpdate(leaveId, { $set: { status } });
+            if(leave.leaveType === "Casual Leave" && leave.role === '3P'){
+                console.log("CL")
+                const cl = await CasualLeave.findOne({empId: leave.empId})
+                cl.availed -= leave.numberOfDays;
+                cl.LOP -= leave.LOP;
+                cl.closingBalance += leave.numberOfDays;
+                await cl.save()
+            }
+            else if(leave.leaveType === "Casual Leave" && leave.role === 'GVR'){
+                console.log("CL")
+                const cl = await CasualLeave.findOne({empId: leave.empId})
+                cl.availed -= leave.numberOfDays;
+                cl.LOP -= leave.LOP;
+                cl.closingBalance += leave.numberOfDays;
+                await cl.save()
+            }
+            else if(leave.leaveType === "Privelage Leave"){
+                const pl = await PrivelageLeave.findOne({empId: leave.empId})
+                pl.availed -= leave.numberOfDays;
+                pl.LOP -= leave.LOP;
+                pl.closingBalance += leave.numberOfDays;
+                pl.carryForward += leave.numberOfDays;
+                await pl.save()
+            }
+            else if(leave.leaveType === 'Paternity Leave'){
+                const pl = await PaternityLeave.findOne({empId: leave.empId})
+                pl.availed -= leave.numberOfDays;
+                pl.LOP -= leave.LOP;
+                pl.closingBalance += leave.numberOfDays;
+                await pl.save()
+            }
+            else{
+                const adpt = await AdoptionLeave.findById({empId: leave.empId})
+                adpt.availed -= leave.numberOfDays;
+                adpt.LOP -= leave.LOP;
+                adpt.closingBalance += leave.numberOfDays;
+                adpt.save();
+            }
+            Message(emp.empPhone, `Dear ${emp.empName},\n\nYour leave has been *REJECTED* ❌.\n*Leave Type:* ${leave.leaveType}\n*Start Date:* ${leave.from.date}\n*Number of Days:* ${leave.numberOfDays}\n\nPlease ensure that all pending tasks are handed over to the appropriate team members before your leave.\n\nBest Regards,\n*Gilbarco Veeder-Root*`)
             res.status(200).json({message: 'Leave status updated successfully'})
         }
         else{
@@ -193,6 +235,71 @@ const updateStatus = async(req, res)=> {
     }
     catch(err){
         res.status(500).json({ message: 'Server error', err });
+    }
+}
+
+const AcceptRejected = async (req, res) => {
+    try {
+        const { leaveId } = req.body;
+        console.log(leaveId)
+        const leave = await LeaveModel.findById(leaveId);
+        if (!leave) {
+            return res.status(404).json({ message: 'Leave not found' });
+        }
+
+        if(leave.status === 'Withdrawn'){
+            res.status(202).json({ message: 'Already Withdrawn' });
+        }
+        else{
+            if(leave.leaveType === "Casual Leave" && leave.role === '3P'){
+                console.log("CL")
+                const cl = await CasualLeave.findOne({empId: leave.empId})
+                cl.availed += leave.numberOfDays;
+                cl.LOP += leave.LOP;
+                cl.closingBalance -= leave.numberOfDays;
+                await cl.save()
+            }
+            else if(leave.leaveType === "Casual Leave" && leave.role === 'GVR'){
+                console.log("CL")
+                const cl = await CasualLeave.findOne({empId: leave.empId})
+                cl.availed += leave.numberOfDays;
+                cl.LOP += leave.LOP;
+                cl.closingBalance -= leave.numberOfDays;
+                await cl.save()
+            }
+            else if(leave.leaveType === "Privelage Leave"){
+                const pl = await PrivelageLeave.findOne({empId: leave.empId})
+                pl.availed += leave.numberOfDays;
+                pl.LOP += leave.LOP;
+                pl.closingBalance -= leave.numberOfDays;
+                pl.carryForward -= leave.numberOfDays;
+                await pl.save()
+            }
+            else if(leave.leaveType === 'Paternity Leave'){
+                const pl = await PaternityLeave.findOne({empId: leave.empId})
+                pl.availed += leave.numberOfDays;
+                pl.LOP += leave.LOP;
+                pl.closingBalance -= leave.numberOfDays;
+                await pl.save()
+            }
+            else{
+                const atpt = await AdoptionLeave.findById({empId: leave.empId})
+                adpt.availed += leave.numberOfDays;
+                adpt.LOP += leave.LOP;
+                adpt.closingBalance -= leave.numberOfDays;
+                adpt.save();
+            }
+            if(leave.status === 'Pending'){
+                leave.status = 'Approved';
+                await leave.save();
+                const emp = await EmpModel.findOne({empId: leave.empId})
+                Accepted('mohammedashif.a2022cse@sece.ac.in')
+                Message(emp.empPhone, `Dear ${emp.empName},\n\nYour leave has been *ACCEPTED* ✅.\n*Leave Type:* ${leave.leaveType}\n*Start Date:* ${leave.from.date}\n*Number of Days:* ${leave.numberOfDays}\n\nPlease ensure that all pending tasks are handed over to the appropriate team members before your leave.\n\nBest Regards,\n*Gilbarco Veeder-Root*`)
+                res.status(200).json({ message: 'Leave approved successfully', leave });
+            }
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error });
     }
 }
 
@@ -545,4 +652,4 @@ const weakData = async(req, res) => {
     }
 }
 
-module.exports = {checkLeave,ApplyLeave,withDrawLeave,updateStatus,AcceptLeave,Accept,DenyLeave,Deny,GetLeave,cardData,weakData}
+module.exports = {checkLeave,ApplyLeave,withDrawLeave,AcceptRejected,RejectAccepted,AcceptLeave,Accept,DenyLeave,Deny,GetLeave,cardData,weakData}
