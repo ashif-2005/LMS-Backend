@@ -36,6 +36,71 @@ const ApplyPermission = async (req, res) => {
     }
 }
 
+const withDrawPermission = async (req, res) => {
+    try {
+      const { permissionId } = req.body;
+      const permission = await PermissionModel.findById(permissionId);
+      if (permission.status === "Pending") {
+        permission.status = "Withdrawn";
+        await permission.save();
+        res.status(200).json({ message: "Permission withdrawn successfully" });
+      } else {
+        res
+          .status(400)
+          .json({
+            message:
+              "Permission request has already been responded as " + leave.status,
+          });
+      }
+    } catch (err) {
+      res.status(500).json({ message: "Server error", err });
+    }
+}
+
+const AcceptRejected = async(req, res) => {
+    try {
+        const { permissionId } = req.body;
+        const permission = await PermissionModel.findById(permissionId);
+        if (!permission) {
+            return res.status(404).json({ message: 'Permission not found' });
+        }
+        const emp = await EmpModel.findOne({empId: permission.empId});
+        emp.permissionAvailed += permission.hrs;
+        emp.permissionEligible -= permission.hrs;
+        permission.status = 'Approved';
+        await permission.save();
+        await emp.save();
+        Accepted('lingeshwaran.kv2022cse@sece.ac.in')
+        Message(emp.empPhone, `Dear ${emp.empName},\n\nYour Permission has been *ACCEPTED* ✅\n*Date:* ${permission.date}\n*From:* ${permission.from}\n*To:* ${permission.to}\n*Hours:* ${permission.hrs}\n\nPlease ensure that all pending tasks are handed over to the appropriate team members before your permission.\n\nBest Regards,\n*Gilbarco Veeder-Root*`)
+        res.status(200).json({message: "permission accepted successfully"})
+    }
+    catch (error) {
+        res.status(500).json({ message: 'Server error', error });
+    }
+}
+
+const rejectAccepted = async(req, res) => {
+    try {
+        const { permissionId } = req.body;
+        const permission = await PermissionModel.findById(permissionId);
+        if (!permission) {
+            return res.status(404).json({ message: 'Permission not found' });
+        }
+        const emp = await EmpModel.findOne({empId: permission.empId});
+        emp.permissionAvailed -= permission.hrs;
+        emp.permissionEligible += permission.hrs;
+        permission.status = 'Denied';
+        await permission.save();
+        await emp.save();
+        Accepted('lingeshwaran.kv2022cse@sece.ac.in')
+        Message(emp.empPhone, `Dear ${emp.empName},\n\nYour Permission has been *REJECTED* ❌\n*Date:* ${permission.date}\n*From:* ${permission.from}\n*To:*${permission.to}\n*Hours:*${permission.hrs}\n\nPlease ensure that all pending tasks are handed over to the appropriate team members before your permission.\n\nBest Regards,\n*Gilbarco Veeder-Root*`)
+        res.status(200).json({message: "permission accepted successfully"})
+    }
+    catch (error) {
+        res.status(500).json({ message: 'Server error', error });
+    }
+}
+
 // Accept permission
 const AcceptPermission = async (req, res) => {
     try {
@@ -280,4 +345,4 @@ const GetPermission = async (req, res) => {
     }
 }
 
-module.exports = {checkPermission,ApplyPermission,AcceptPermission,Accept,DenyPermission,Deny,withDrawPermisssion,updatePermission,GetPermission}
+module.exports = {checkPermission,ApplyPermission,withDrawPermission,AcceptRejected,rejectAccepted,AcceptPermission,Accept,DenyPermission,Deny,withDrawPermisssion,updatePermission,GetPermission}

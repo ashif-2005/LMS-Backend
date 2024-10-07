@@ -42,7 +42,7 @@ verifyOTP = async(req, res) => {
         setTimeout(async()=>{
             employee.otp = "000000"
             await employee.save()
-        }, 30000)
+        }, 60000)
     }
     catch(err){
         console.log(err)
