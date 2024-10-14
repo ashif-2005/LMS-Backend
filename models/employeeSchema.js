@@ -30,6 +30,15 @@ const schema = new db.Schema(
             type: Array,
             default: []
         },
+        vendor: {
+            type: String,
+            required: true
+        },
+        gender: {
+            type: String,
+            enum: ['Male', 'Female', 'Other'],
+            default: 'Male'
+        },
         manager: {
             type: String,
             required: true
@@ -59,6 +68,10 @@ const schema = new db.Schema(
             required: true
         },
         location: {
+            type: String,
+            required: true
+        },
+        unit: {
             type: String,
             required: true
         },

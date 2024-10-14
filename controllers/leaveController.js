@@ -184,12 +184,9 @@ const withDrawLeave = async (req, res) => {
       await leave.save();
       res.status(200).json({ message: "Leave withdrawn successfully" });
     } else {
-      res
-        .status(400)
-        .json({
-          message:
-            "Leave request has already been responded as " + leave.status,
-        });
+      res.status(400).json({
+        message: "Leave request has already been responded as " + leave.status,
+      });
     }
   } catch (err) {
     res.status(500).json({ message: "Server error", err });
@@ -593,12 +590,10 @@ const checkLeave = async (req, res) => {
         const cl = await CasualLeave.findOne({ empId: empId });
         console.log(cl);
         if (numberOfDays >= cl.closingBalance) {
-          res
-            .status(200)
-            .json({
-              CL: cl.closingBalance,
-              LOP: numberOfDays - cl.closingBalance,
-            });
+          res.status(200).json({
+            CL: cl.closingBalance,
+            LOP: numberOfDays - cl.closingBalance,
+          });
         } else {
           res.status(200).json({ CL: numberOfDays, LOP: 0 });
         }
@@ -607,36 +602,30 @@ const checkLeave = async (req, res) => {
         const pl = await PrivelageLeave.findOne({ empId: empId });
         console.log(pl);
         if (numberOfDays >= pl.closingBalance) {
-          res
-            .status(200)
-            .json({
-              PL: pl.closingBalance,
-              LOP: numberOfDays - pl.closingBalance,
-            });
+          res.status(200).json({
+            PL: pl.closingBalance,
+            LOP: numberOfDays - pl.closingBalance,
+          });
         } else {
           res.status(200).json({ PL: numberOfDays, LOP: 0 });
         }
       } else if (leaveType === "Paternity Leave") {
         const pl = await PaternityLeave.findOne({ empId: empId });
         if (numberOfDays >= pl.x) {
-          res
-            .status(200)
-            .json({
-              PAL: pl.closingBalance,
-              LOP: numberOfDays - pl.closingBalance,
-            });
+          res.status(200).json({
+            PAL: pl.closingBalance,
+            LOP: numberOfDays - pl.closingBalance,
+          });
         } else {
           res.status(200).json({ PAL: numberOfDays, LOP: 0 });
         }
       } else {
         const adpt = await AdoptionLeave.findOne({ empId: empId });
         if (numberOfDays > adpt.closingBalance) {
-          res
-            .status(200)
-            .json({
-              ADPT: adpt.closingBalance,
-              LOP: numberOfDays - adpt.closingBalance,
-            });
+          res.status(200).json({
+            ADPT: adpt.closingBalance,
+            LOP: numberOfDays - adpt.closingBalance,
+          });
         } else {
           res.status(200).json({ ADPT: numberOfDays, LOP: 0 });
         }
@@ -657,11 +646,6 @@ const GetLeave = async (req, res) => {
       res.status(200).json(leaves);
     } else {
       const leaves = await LeaveModel.find({ empId });
-      if (!leaves.length) {
-        return res
-          .status(404)
-          .json({ message: "No leaves found for this employee" });
-      }
       res.status(200).json(leaves);
     }
   } catch (error) {
