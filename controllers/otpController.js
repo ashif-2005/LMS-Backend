@@ -18,7 +18,7 @@ sendOTP = async(req, res) => {
         await emp.save()
         const message = await client.messages.create({
             body: `${OTP} is your LMS authentication code. @Gilbarco Veeder-Root #${OTP}`,
-            from: '+17758354888', 
+            from: '+19252353064', 
             to: req.body.number
         });
         res.status(200).json({message: 'OTP sent successfully'})
