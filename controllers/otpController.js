@@ -66,8 +66,4 @@ verifyOTP = async (req, res) => {
   }
 };
 
-<<<<<<< HEAD
-module.exports = { sendOTP, verifyOTP };
-=======
 module.exports = {sendOTP, verifyOTP}
->>>>>>> 37d2c2c472a7f4f4859f22b634535ca0d3b7abba
