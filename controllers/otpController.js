@@ -11,26 +11,6 @@ generateOTP = () => {
   return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
-<<<<<<< HEAD
-sendOTP = async (req, res) => {
-  try {
-    const OTP = generateOTP();
-    const emp = await EmpModel.findOne({ empPhone: req.body.number });
-    const hashedOTP = bcrypt.hash(OTP, 10);
-    emp.otp = hashedOTP;
-    await emp.save();
-    const message = await client.messages.create({
-      body: `${OTP} is your LMS authentication code. @Gilbarco Veeder-Root #${OTP}`,
-      from: "+17758354888",
-      to: req.body.number,
-    });
-    res.status(200).json({ message: "OTP sent successfully" });
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: "Server Error" });
-  }
-};
-=======
 sendOTP = async(req, res) => {
     try{
         const OTP = generateOTP()
@@ -49,7 +29,6 @@ sendOTP = async(req, res) => {
         res.status(500).json({message: 'Server Error'})
     }
 }
->>>>>>> 37d2c2c472a7f4f4859f22b634535ca0d3b7abba
 
 verifyOTP = async (req, res) => {
   try {
