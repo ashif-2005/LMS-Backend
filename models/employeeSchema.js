@@ -7,6 +7,15 @@ const schema = new db.Schema(
             required: true,
             unique: true
         },
+        userName: {
+            type: String,
+            required: true,
+            unique: true
+        },
+        password: {
+            type: String,
+            required: true
+        },
         empName: {
             type: String,
             required: true
@@ -90,10 +99,6 @@ const schema = new db.Schema(
         permissionAvailed: {
             type: Number,
             default: 0
-        },
-        otp: {
-            type: String,
-            default: '000000'
         }
     },
     {

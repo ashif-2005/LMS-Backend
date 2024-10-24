@@ -1,5 +1,5 @@
-const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const bcrypt = require("bcrypt");
 const dotenv = require('dotenv')
 dotenv.config('./env')
 const { EmpModel } = require('../models/employeeSchema');
@@ -11,7 +11,7 @@ const { AdoptionLeave } = require('../models/adoptionLeaveModel');
 // Signup
 const Register = async (req, res) => {
     try {
-        const { empId, empName, empMail, empPhone, role, vendor, gender, manager, designation, reportionManager, dateOfJoining, function: empFunction, department, level, location, unit, isAdpt, isPaternity, permissionEligible, permissionAvailed } = req.body;
+        const { empId, userName, password, empName, empMail, empPhone, role, vendor, gender, manager, designation, reportionManager, dateOfJoining, function: empFunction, department, level, location, unit, isAdpt, isPaternity, permissionEligible, permissionAvailed } = req.body;
 
         // Check if employee already exists
         const existingEmployee = await EmpModel.findOne({ empId });
@@ -19,9 +19,18 @@ const Register = async (req, res) => {
             return res.status(400).json({ message: 'Employee with this ID already exists' });
         }
 
+        const existingUser = await EmpModel.findOne({ userName });
+        if (existingUser){
+            return res.status(400).json({ message: 'User ID already exists' });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
         // Create new employee
         const newEmployee = new EmpModel({
             empId,
+            userName,
+            password: hashedPassword,
             empName,
             empMail,
             empPhone,
@@ -118,31 +127,31 @@ const Register = async (req, res) => {
     }
 }
 
-// // Login
-// const Login = async (req, res) => {
-//     try {
-//         const { empId, password } = req.body;
+// Login
+const Login = async (req, res) => {
+    try {
+        const { userName, password } = req.body;
 
-//         // Find employee by ID
-//         const employee = await EmpModel.findOne({ empId });
-//         if (!employee) {
-//             return res.status(400).json({ message: 'Employee not found' });
-//         }
+        // Find employee by ID
+        const employee = await EmpModel.findOne({ userName });
+        if (!employee) {
+            return res.status(400).json({ message: 'Employee not found' });
+        }
 
-//         // Compare password
-//         const isMatch = await bcrypt.compare(password, employee.password);
-//         if (!isMatch) {
-//             return res.status(400).json({ message: 'Invalid credentials' });
-//         }
+        // Compare password
+        const isMatch = await bcrypt.compare(password, employee.password);
+        if (!isMatch) {
+            return res.status(400).json({ message: 'Invalid credentials' });
+        }
 
-//         // Generate JWT token
-//         const token = jwt.sign({ empId: employee.empId, role: employee.role }, process.env.SECRET, { expiresIn: '1h' });
+        // Generate JWT token
+        const token = jwt.sign({ empId: employee.empId, role: employee.role, empName: employee.empName, empMail: employee.empMail, managerMail: employee.reportionManager}, process.env.SECRET, { expiresIn: '1h' });
 
-//         res.status(200).json({ message: 'Login successful', token });
-//     } catch (error) {
-//         res.status(500).json({ message: 'Server error', error });
-//     }
-// }
+        res.status(200).json({ message: 'Login successful', token });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error });
+    }
+}
 
 const RFIDLogin = async(req,res) =>{
     try {
