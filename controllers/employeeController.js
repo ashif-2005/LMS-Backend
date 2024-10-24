@@ -198,4 +198,4 @@ const getAllEmp = async(req, res) => {
     }
 }
 
-module.exports = {Register,RFIDLogin,GetEmp, getAllEmp}
+module.exports = {Register,Login,RFIDLogin,GetEmp, getAllEmp}
