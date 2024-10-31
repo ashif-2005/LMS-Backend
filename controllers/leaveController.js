@@ -636,8 +636,8 @@ const Deny = async (req, res) => {
 //   }
 // };
 
-const checkLeave = async(req, res) => {
-  try{
+const checkLeave = async (req, res) => {
+  try {
     const { empId, role, LeaveType, from, numberOfDays } = req.body;
     console.log(from.date.slice(0, 2));
     const fromData = await LeaveModel.find({
@@ -664,7 +664,7 @@ const checkLeave = async(req, res) => {
       return res
         .status(202)
         .json({ mesasage: "Already leave had applied in the same day" });
-    } else if (from.secondHalf && (From.length || To.length)) { 
+    } else if (from.secondHalf && (From.length || To.length)) {
       return res
         .status(202)
         .json({ mesasage: "Already leave had applied in the same day" });
@@ -674,96 +674,89 @@ const checkLeave = async(req, res) => {
       empId: empId,
       days: { $in: [from.date.slice(0, 2)] },
     });
-    console.log(data)
+    console.log(data);
     if (data.length) {
       return res
         .status(202)
         .json({ mesasage: "Already leave had applied in the same day" });
     }
-    if(role === '3P'){
+    if (role === "3P") {
       const cl = await CasualLeave.findOne({ empId: empId });
-      if((1 - cl.availed) >= numberOfDays){
+      if (1 - cl.availed >= numberOfDays) {
         res.status(200).json({
-          message: "You can take leave"
-        })
-      }
-      else{
+          message: "You can take leave",
+        });
+      } else {
         res.status(203).json({
-          message: "Your leave limit exceeded please try applying leave in LOP"
-        })
+          message: "Your leave limit exceeded please try applying leave in LOP",
+        });
       }
-    }
-    else{
-      console.log(LeaveType)
-      if(LeaveType === "Casual Leave"){
-        console.log("sample")
+    } else {
+      console.log(LeaveType);
+      if (LeaveType === "Casual Leave") {
+        console.log("sample");
         const cl = await CasualLeave.findOne({ empId: empId });
-        if(cl.closingBalance >= numberOfDays){
+        if (cl.closingBalance >= numberOfDays) {
           res.status(200).json({
-            message: "You can take leave"
-          })
-        }
-        else{
+            message: "You can take leave",
+          });
+        } else {
           res.status(203).json({
-            message: "Your leave limit exceeded please try applying leave in LOP"
-          })
+            message:
+              "Your leave limit exceeded please try applying leave in LOP",
+          });
         }
-      }
-      else if(LeaveType === "Privilege Leave"){
+      } else if (LeaveType === "Privilege Leave") {
         pl = await PrivelageLeave.findOne({ empId });
-        if(pl.closingBalance >= numberOfDays){
+        if (pl.closingBalance >= numberOfDays) {
           res.status(200).json({
-            message: "You can take leave"
-          })
-        }
-        else{
+            message: "You can take leave",
+          });
+        } else {
           res.status(203).json({
-            message: "Your leave limit exceeded please try applying leave in LOP"
-          })
+            message:
+              "Your leave limit exceeded please try applying leave in LOP",
+          });
         }
-      }
-      else if(LeaveType === "Paternity Leave"){
+      } else if (LeaveType === "Paternity Leave") {
         p = await PaternityLeave.findOne({ empId });
-        if(p.closingBalance >= numberOfDays){
+        if (p.closingBalance >= numberOfDays) {
           res.status(200).json({
-            message: "You can take leave"
-          })
-        }
-        else{
+            message: "You can take leave",
+          });
+        } else {
           res.status(203).json({
-            message: "Your leave limit exceeded please try applying leave in LOP"
-          })
+            message:
+              "Your leave limit exceeded please try applying leave in LOP",
+          });
         }
-      }
-      else if(LeaveType === "Adoption Leave"){
+      } else if (LeaveType === "Adoption Leave") {
         adpt = await AdoptionLeave.findOne({ empId });
-        if(adpt.closingBalance >= numberOfDays){
+        if (adpt.closingBalance >= numberOfDays) {
           res.status(200).json({
-            message: "You can take leave"
-          })
-        }
-        else{
+            message: "You can take leave",
+          });
+        } else {
           res.status(203).json({
-            message: "Your leave limit exceeded please try applying leave in LOP"
-          })
+            message:
+              "Your leave limit exceeded please try applying leave in LOP",
+          });
         }
-      }
-      else{
+      } else {
         res.status(400).json({ message: "Invalid Leave Type" });
       }
     }
-  }
-  catch(error){
+  } catch (error) {
     res.status(500).json({ message: "Server error", error });
   }
-}
+};
 
 const GetLeave = async (req, res) => {
   try {
     const { empId } = req.body;
     const employee = await EmpModel.findOne({ empId });
     if (employee.role === "Manager") {
-      const leaves = await LeaveModel.find({});
+      const leaves = await LeaveModel.find({manager: employee.empName});
 
       res.status(200).json(leaves);
     } else {
