@@ -15,7 +15,8 @@ sendOTP = async(req, res) => {
     try{
         const OTP = generateOTP()
         const emp = await EmpModel.findOne({empPhone: req.body.number});
-        emp.otp = OTP
+        const otp = bcrypt.hash(OTP, 10);
+        emp.otp = otp
         await emp.save()
         const message = await client.messages.create({
             body: `${OTP} is your LMS authentication code. @Gilbarco Veeder-Root #${OTP}`,
@@ -35,22 +36,20 @@ verifyOTP = async (req, res) => {
     const employee = await EmpModel.findOne({ empPhone: req.body.number });
     if (req.body.otp != "000000") {
       const isMatch = await bcrypt.compare(req.body.otp, employee.otp);
-    } else {
-      res.status(401).json({ message: "Incorrect OTP" });
-    }
-    if (!isMatch) {
-      const token = jwt.sign(
-        {
-          empId: employee.empId,
-          role: employee.role,
-          empName: employee.empName,
-          empMail: employee.empMail,
-          managerMail: employee.reportionManager,
-        },
-        process.env.SECRET,
-        { expiresIn: "1h" }
-      );
-      res.status(200).json({ message: "Login successful", token });
+      if (!isMatch) {
+        const token = jwt.sign(
+          {
+            empId: employee.empId,
+            role: employee.role,
+            empName: employee.empName,
+            empMail: employee.empMail,
+            managerMail: employee.reportionManager,
+          },
+          process.env.SECRET,
+          { expiresIn: "1h" }
+        );
+        res.status(200).json({ message: "Login successful", token });
+      }
     } else {
       res.status(401).json({ message: "Incorrect OTP" });
     }
