@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const {checkLeave,ApplyLeave,withDrawLeave,AcceptRejected,RejectAccepted,AcceptLeave,Accept,DenyLeave,Deny,GetLeave,cardData,weakData} = require('../controllers/leaveController');
+const {checkLeave,ApplyLeave,withDrawLeave,AcceptRejected,RejectAccepted,AcceptLeave,Accept,DenyLeave,Deny,GetLeave,cardData,weakData,gauge} = require('../controllers/leaveController');
 const checkUser = require('../middleware/auth')
 
 router.post('/apply', checkUser, ApplyLeave)
@@ -14,5 +14,6 @@ router.post('/acceptRejected',checkUser,AcceptRejected)
 router.post('/rejectAccepted',checkUser,RejectAccepted)
 router.get('/cardData',checkUser,cardData)
 router.get('/weekData',checkUser,weakData)
+router.post('/gauge',checkUser,gauge)
 
 module.exports = router;

@@ -15,6 +15,10 @@ const schema = new db.Schema(
             enum: ['Admin', 'Manager', '3P', 'GVR'],
             default: '3P'
         },
+        manager: {
+            type: String,
+            required: true
+        },
         leaveType: {
             type: String,
             enum: ['Casual Leave', 'Privilege Leave', 'Paternity Leave', 'Adoption Leave'],

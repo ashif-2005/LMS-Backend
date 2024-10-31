@@ -60,6 +60,7 @@ const ApplyLeave = async (req, res) => {
           empId,
           empName: emp.empName,
           role: emp.role,
+          manager: emp.manager,
           leaveType,
           from,
           to,
@@ -79,6 +80,7 @@ const ApplyLeave = async (req, res) => {
           empId,
           empName: emp.empName,
           role: emp.role,
+          manager: emp.manager,
           leaveType,
           from,
           to,
@@ -104,6 +106,7 @@ const ApplyLeave = async (req, res) => {
           empId,
           empName: emp.empName,
           role: emp.role,
+          manager: emp.manager,
           leaveType,
           from,
           to,
@@ -124,6 +127,7 @@ const ApplyLeave = async (req, res) => {
             empId,
             empName: emp.empName,
             role: emp.role,
+            manager: emp.manager,
             leaveType,
             from,
             to,
@@ -146,6 +150,7 @@ const ApplyLeave = async (req, res) => {
           empId,
           empName: emp.empName,
           role: emp.role,
+          manager: emp.manager,
           leaveType,
           from,
           to,
@@ -791,6 +796,19 @@ const weakData = async (req, res) => {
   }
 };
 
+const gauge = async(req, res) => {
+  try{
+    const { empId, employeeId } = req.body;
+    const emp = await EmpModel.findOne({ empId });
+    const leaves = await LeaveModel.find({manager: emp.empName});
+    const leave = await LeaveModel.find({ empId: employeeId });
+    res.status(200).json({all: leaves.length, emp: leave.length});
+  }
+  catch(err){
+    res.status(500).json({ message: "Server error", err });
+  }
+}
+
 module.exports = {
   checkLeave,
   ApplyLeave,
@@ -804,4 +822,5 @@ module.exports = {
   GetLeave,
   cardData,
   weakData,
+  gauge
 };
