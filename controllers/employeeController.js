@@ -11,7 +11,7 @@ const { AdoptionLeave } = require('../models/adoptionLeaveModel');
 // Signup
 const Register = async (req, res) => {
     try {
-        const { empId, userName, password, empName, empMail, empPhone, role, vendor, gender, manager, designation, reportionManager, dateOfJoining, function: empFunction, department, level, location, unit, isAdpt, isPaternity, permissionEligible, permissionAvailed } = req.body;
+        const { id, empId, userName, password, empName, empMail, empPhone, role, vendor, gender, manager, designation, reportionManager, dateOfJoining, function: empFunction, department, level, location, unit, isAdpt, isPaternity, permissionEligible, permissionAvailed } = req.body;
 
         // Check if employee already exists
         const existingEmployee = await EmpModel.findOne({ empId });
@@ -198,4 +198,84 @@ const getAllEmp = async(req, res) => {
     }
 }
 
-module.exports = {Register,Login,RFIDLogin,GetEmp, getAllEmp}
+const updateEmpDetails = async(req, res) => {
+    try{
+        const { id, empId, userName, password, empName, empMail, empPhone, role, vendor, gender, manager, designation, reportionManager, dateOfJoining, function: empFunction, department, level, location, unit, isAdpt, isPaternity, permissionEligible, permissionAvailed } = req.body;
+        const admin = await EmpModel.findOne({ empId: id })
+        if(!admin){
+            return res.status(404).json({message: "Employee not found"})
+        }
+        else if(admin.role === "Admin"){
+            const emp = await EmpModel.findOne({ empId })
+            const updateEmpDetails = await EmpModel.updateOne({ empId: empId },{
+                empName: empName,
+                empMail: empMail,
+                empPhone: empPhone,
+                role: role,
+                vendor: vendor,
+                gender: gender,
+                manager: manager,
+                designation: designation,
+                reportionManager: reportionManager,
+                dateOfJoining: dateOfJoining,
+                function: empFunction,
+                department: department,
+                level: level,
+                location: location,
+                unit: unit,
+                isAdpt: isAdpt,
+                isPaternity: isPaternity,
+                permissionEligible: permissionEligible,
+                permissionAvailed: permissionAvailed
+            })
+        }
+        else{
+            return res.status(400).json({message: "Permission Denied"})
+        }
+    }
+    catch(err){
+        res.status(500).json({message: "Server Error", error: err})
+    }
+}
+
+const deleteEmp = async(req, res) => {
+    try{
+        const { empId } = req.body;
+        const admin = await EmpModel.findOne({ empId: empId })
+        if(!admin){
+            return res.status(404).json({message: "Employee not found"})
+        }
+        else if(admin.role === "Admin"){
+            const emp = await EmpModel.findOneAndDelete({ empId })
+            res.status(200).json({message: "Employee deleted successfully"})
+        }
+        else{
+            return res.status(400).json({message: "Permission Denied"})
+        }
+    }
+    catch(err){
+        res.status(500).json({message: "Server Error", error: err})
+    }
+}
+
+const importEmp = async(req, res) => {
+    try{
+        const { id, emp } = req.body
+        const admin = await EmpModel.findOne({ empId: id })
+        if(!admin){
+            return res.status(404).json({message: "Employee not found"})
+        }
+        else if(admin.role === "Admin"){
+            await EmpModel.insertMany(emp)
+            res.status(200).json({message: "Employees imported successfully"})
+        }
+        else{
+            return res.status(400).json({message: "Permission Denied"})
+        }
+    }
+    catch(err){
+        res.status(500).json({message: "Server Error", error: err})
+    }
+}
+
+module.exports = {Register,Login,RFIDLogin,GetEmp, getAllEmp, updateEmpDetails, deleteEmp, importEmp}

@@ -32,7 +32,7 @@ const schema = new db.Schema(
         },
         role: {
             type: String,
-            enum: ['Admin', 'Manager', '3P', 'GVR', 'HR', "Admin"],
+            enum: ['Admin', 'Manager', '3P', 'GVR', 'HR'],
             default: '3P'
         },
         employees: {
