@@ -27,7 +27,7 @@ const Register = async (req, res) => {
         }
 
         const existingUser = await EmpModel.findOne({ userName });
-        if (existingUser){
+        if (existingUser){  
             return res.status(400).json({ message: 'User ID already exists' });
         }
 
@@ -251,8 +251,8 @@ const updateEmpDetails = async(req, res) => {
 
 const deleteEmp = async(req, res) => {
     try{
-        const { empId } = req.body;
-        const admin = await EmpModel.findOne({ empId: empId })
+        const { id, empId } = req.body;
+        const admin = await EmpModel.findOne({ empId: id })
         if(!admin){
             return res.status(404).json({message: "Employee not found"})
         }
