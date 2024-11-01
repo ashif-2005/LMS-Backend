@@ -56,7 +56,7 @@ const schema = new db.Schema(
             type: String,
             required: true
         },
-        reportionManager: {
+        reportingManager: {
             type: String,
             required: true
         },

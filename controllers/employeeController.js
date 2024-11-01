@@ -11,10 +11,17 @@ const { AdoptionLeave } = require('../models/adoptionLeaveModel');
 // Signup
 const Register = async (req, res) => {
     try {
-        const { id, empId, userName, password, empName, empMail, empPhone, role, vendor, gender, manager, designation, reportionManager, dateOfJoining, function: empFunction, department, level, location, unit, isAdpt, isPaternity, permissionEligible, permissionAvailed } = req.body;
+        const { id, empId, userName, password, empName, empMail, empPhone, role, vendor, gender, manager, designation, reportingManager, dateOfJoining, function: empFunction, department, level, location, unit, isAdpt, isPaternity, permissionEligible, permissionAvailed } = req.body;
 
         // Check if employee already exists
         const existingEmployee = await EmpModel.findOne({ empId });
+        const emp = await EmpModel.findOne({ empId: id });
+        if(!emp){
+            return res.status(404).json({ message: 'Employee not found' });
+        }
+        if(emp.role != 'Admin'){
+            return res.status(403).json({ message: 'Only Admin can create new employee' });
+        }
         if (existingEmployee) {
             return res.status(400).json({ message: 'Employee with this ID already exists' });
         }
@@ -39,7 +46,7 @@ const Register = async (req, res) => {
             gender,
             manager,
             designation,
-            reportionManager,
+            reportingManager,
             dateOfJoining,
             function: empFunction,
             department,
