@@ -263,7 +263,7 @@ const updateEmpDetails = async(req, res) => {
         const { id, empId, empName, empMail, empPhone, role, vendor, gender, manager, designation, reportingManager, dateOfJoining, function: empFunction, department, level, location, unit, isAdpt, isPaternity, permissionEligible, permissionAvailed } = req.body;
         const admin = await EmpModel.findOne({ empId: id })
         if(!admin){
-            return res.status(404).json({message: "Employee not found"})
+            res.status(404).json({message: "Employee not found"})
         }
         else if(admin.role === "Admin"){
             const emp = await EmpModel.findOne({ empId })
@@ -288,9 +288,10 @@ const updateEmpDetails = async(req, res) => {
                 permissionEligible: permissionEligible,
                 permissionAvailed: permissionAvailed
             })
+            res.status(200).json({message: "Employee details updated successfully"})
         }
         else{
-            return res.status(400).json({message: "Permission Denied"})
+            res.status(400).json({message: "Permission Denied"})
         }
     }
     catch(err){
