@@ -99,6 +99,9 @@ const schema = new db.Schema(
         permissionAvailed: {
             type: Number,
             default: 0
+        },
+        otp: {
+            type: String
         }
     },
     {

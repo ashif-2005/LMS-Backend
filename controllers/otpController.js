@@ -15,7 +15,7 @@ const sendOTP = async(req, res) => {
     try{
         const OTP = generateOTP()
         const emp = await EmpModel.findOne({userName: req.body.userName});
-        const otp = bcrypt.hash(OTP, 10);
+        const otp = await bcrypt.hash(OTP, 10);
         emp.otp = otp
         await emp.save()
         const message = await client.messages.create({
@@ -31,31 +31,26 @@ const sendOTP = async(req, res) => {
     }
 }
 
-const verifyOTP = async (req, res) => {
+const verifyOTP = async(req, res) => {
   try {
     const employee = await EmpModel.findOne({ userName: req.body.userName });
+    console.log(employee)
     if (req.body.otp != "000000") {
       const isMatch = await bcrypt.compare(req.body.otp, employee.otp);
-      if (!isMatch) {
-        // const token = jwt.sign(
-        //   {
-        //     empId: employee.empId,
-        //     role: employee.role,
-        //     empName: employee.empName,
-        //     empMail: employee.empMail,
-        //     managerMail: employee.reportionManager,
-        //   },
-        //   process.env.SECRET,
-        //   { expiresIn: "1h" }
-        // );
-        res.status(200).json({ message: "OTP verified successful", token });
+      console.log(req.body.otp)
+      console.log(isMatch)
+      if (isMatch) {
+        res.status(200).json({ message: "OTP verified successful" });
+      }
+      else {
+        res.status(401).json({ message: "Incorrect OTP" });
       }
     } else {
       res.status(401).json({ message: "Incorrect OTP" });
     }
     setTimeout(async () => {
       const temp = "000000";
-      const hashedOTP = bcrypt.hash(temp, 10);
+      const hashedOTP = await bcrypt.hash(temp, 10);
       employee.otp = hashedOTP;
       await employee.save();
     }, 60000);
