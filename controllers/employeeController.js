@@ -260,7 +260,7 @@ const getAllEmp = async(req, res) => {
 
 const updateEmpDetails = async(req, res) => {
     try{
-        const { id, empId, empName, empMail, empPhone, role, vendor, gender, manager, designation, reportionManager, dateOfJoining, function: empFunction, department, level, location, unit, isAdpt, isPaternity, permissionEligible, permissionAvailed } = req.body;
+        const { id, empId, empName, empMail, empPhone, role, vendor, gender, manager, designation, reportingManager, dateOfJoining, function: empFunction, department, level, location, unit, isAdpt, isPaternity, permissionEligible, permissionAvailed } = req.body;
         const admin = await EmpModel.findOne({ empId: id })
         if(!admin){
             return res.status(404).json({message: "Employee not found"})
@@ -276,7 +276,7 @@ const updateEmpDetails = async(req, res) => {
                 gender: gender,
                 manager: manager,
                 designation: designation,
-                reportionManager: reportionManager,
+                reportingManager: reportingManager,
                 dateOfJoining: dateOfJoining,
                 function: empFunction,
                 department: department,
