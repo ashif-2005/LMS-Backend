@@ -6,7 +6,6 @@ const { AdoptionLeave } = require('../models/adoptionLeaveModel');
 const getDetails = async(req, res) =>{
     try{
         const {empId} = req.body
-        console.log(empId)
         const clDetails = await CasualLeave.findOne({empId});
         const plDetails = await PrivelageLeave.findOne({empId});
         const paternityLeave = await PaternityLeave.findOne({empId});

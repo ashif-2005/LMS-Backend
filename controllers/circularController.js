@@ -18,7 +18,7 @@ const addCircular = async(req, res) => {
 
         const circular = new Circular({empId, empName, message,subject});
         await circular.save()
-        res.status(201).json(circular);
+        res.status(200).json(circular);
     }
     catch(err){
         res.status(500).json({ error: err.message });
@@ -29,7 +29,7 @@ const getAllCirculars = async(req, res) => {
     try{
         const emp = await EmpModel.findOne({empId: req.params.empId})
         const circulars = await Circular.find({empName: emp.manager});
-        res.json(circulars);
+        res.status(200).json(circulars);
     }
     catch(err){
         res.status(500).json({ error: err.message });

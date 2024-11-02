@@ -8,6 +8,50 @@ const { PrivelageLeave } = require('../models/privelageLeaveSchema');
 const { PaternityLeave } = require('../models/paternityLeaveSchema');
 const { AdoptionLeave } = require('../models/adoptionLeaveModel');
 
+const addAdmin = async(req, res) => {
+    try{
+        const { empId, userName, password, empName, empMail, empPhone, role, vendor, gender, manager, designation, reportingManager, dateOfJoining, function: empFunction, department, level, location, unit, isAdpt, isPaternity, permissionEligible, permissionAvailed } = req.body;
+        const existingEmployee = await EmpModel.findOne({ empId });
+        if (existingEmployee) {
+            return res.status(400).json({ message: 'Employee with this ID already exists' });
+        }
+        const existingUser = await EmpModel.findOne({ userName });
+        if (existingUser){  
+            return res.status(400).json({ message: 'User ID already exists' });
+        }
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newEmployee = new EmpModel({
+            empId,
+            userName,
+            password: hashedPassword,
+            empName,
+            empMail,
+            empPhone,
+            role,
+            vendor,
+            gender,
+            manager,
+            designation,
+            reportingManager,
+            dateOfJoining,
+            function: empFunction,
+            department,
+            level,
+            location,
+            unit,
+            isPaternity,
+            isAdpt,
+            permissionEligible,
+            permissionAvailed
+        });
+        await newEmployee.save();
+        res.status(201).json({ message: 'Employee registered successfully' });
+    }
+    catch(err){
+        res.status(500).json({ message: 'Server Error' });
+    }
+}
+
 // Signup
 const Register = async (req, res) => {
     try {
@@ -62,7 +106,7 @@ const Register = async (req, res) => {
         if(role === "GVR" || role === "3P"){
             const data = await EmpModel.findOne({empName: manager})
             if(!data){
-                return res.status(400).json({message: "Manager not found"})
+                return res.status(402).json({message: "Manager not found"})
             }
             else{
                 console.log("Adding employee...")
@@ -101,7 +145,6 @@ const Register = async (req, res) => {
                 totalEligibility: 12,
                 closingBalance: 12
             })
-
             await cl.save()
         }
         else if(role === "GVR"){
@@ -142,7 +185,7 @@ const Login = async (req, res) => {
         // Find employee by ID
         const employee = await EmpModel.findOne({ userName });
         if (!employee) {
-            return res.status(400).json({ message: 'Employee not found' });
+            return res.status(404).json({ message: 'Employee not found' });
         }
 
         // Compare password
@@ -166,7 +209,7 @@ const RFIDLogin = async(req,res) =>{
 
         const employee = await EmpModel.findOne({ empId });
         if (!employee) {
-            return res.status(400).json({ message: 'Employee not found'});
+            return res.status(404).json({ message: 'Employee not found'});
         }
 
         // Generate JWT token
@@ -183,6 +226,9 @@ const GetEmp = async (req, res) => {
     try {
         console.log(req.body.empId);
         const employees = await EmpModel.find({"empId": req.body.empId});
+        if(!employees){
+            return res.status(404).json({ message: 'Employee not found' });
+        }
         res.status(200).json(employees);
     } catch (error) {
         res.status(500).json({ message: 'Server error', error});
@@ -192,6 +238,9 @@ const GetEmp = async (req, res) => {
 const getAllEmp = async(req, res) => {
     try{
         const employee = await EmpModel.findOne({"empId": req.body.empId})
+        if(!employee){
+            return res.status(404).json({ message: 'Employee not found' });
+        }
         if(employee.role === "Manager"){
             const emp = await EmpModel.find({manager: employee.empName});
             res.status(200).json(emp);
@@ -289,4 +338,20 @@ const importEmp = async(req, res) => {
     }
 }
 
-module.exports = {Register,Login,RFIDLogin,GetEmp, getAllEmp, updateEmpDetails, deleteEmp, importEmp}
+const forgetPassword = async(req, res) => {
+    try{
+        const { userName, password } = req.body
+        const employee = await EmpModel.findOne({ userName });
+        if(!employee){
+            return res.status(404).json({message: "Employee not found"})
+        }
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const updatePassword = await EmpModel.findOneAndUpdate({ userName }, { password: hashedPassword });
+        res.status(200).json({message: "Password updated successfully"})
+    }
+    catch(err){
+        res.status(500).json({message: "Server Error", error: err})
+    }
+}
+
+module.exports = {addAdmin, Register,Login,RFIDLogin,GetEmp, getAllEmp, updateEmpDetails, deleteEmp, importEmp, forgetPassword}

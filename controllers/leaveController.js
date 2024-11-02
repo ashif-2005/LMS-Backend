@@ -760,6 +760,9 @@ const GetLeave = async (req, res) => {
   try {
     const { empId } = req.body;
     const employee = await EmpModel.findOne({ empId });
+    if(!employee){
+      return res.status(404).json({ message: 'Employee not found' });
+    }
     if (employee.role === "Manager") {
       const leaves = await LeaveModel.find({manager: employee.empName});
 
