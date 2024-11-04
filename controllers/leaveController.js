@@ -94,36 +94,34 @@ const ApplyLeave = async (req, res) => {
         });
         await leave.save();
         res.status(201).json({ message: "Leave applied successfully", leave });
-      }
-      else if (leaveType === "LOP") {
+      } else if (leaveType === "LOP") {
         const lop = await LeaveModel.findOne({ empId });
-          const leave = new LeaveModel({
-            empId,
-            empName: lop.empName,
-            role: lop.role,
-            manager: lop.manager,
-            leaveType,
-            from,
-            to,
-            numberOfDays,
-            leaveDays,
-            days: list,
-            reasonType,
-            reason,
-            today: `${year}/${month}/${date}`,
-            LOP,
-          });
-          await leave.save();
-          res.status(201).json({ message: "Leave applied successfully", leave });
-      }
-      else {
+        const leave = new LeaveModel({
+          empId,
+          empName: lop.empName,
+          role: lop.role,
+          manager: lop.manager,
+          leaveType,
+          from,
+          to,
+          numberOfDays,
+          leaveDays,
+          days: list,
+          reasonType,
+          reason,
+          today: `${year}/${month}/${date}`,
+          LOP,
+        });
+        await leave.save();
+        res.status(201).json({ message: "Leave applied successfully", leave });
+      } else {
         return res
           .status(400)
           .json({ message: "Permission Denied to Apply Leave" });
       }
-    } else if(emp.role === "GVR") {
+    } else if (emp.role === "GVR") {
       if (leaveType === "Casual Leave") {
-        console.log("check")
+        console.log("check");
         const cl = await CasualLeave.findOne({ empId });
         const leave = new LeaveModel({
           empId,
@@ -192,8 +190,7 @@ const ApplyLeave = async (req, res) => {
           `Dear ${manager.empName},\n\nYou have received a new leave request from *${emp.empName}*.\n\n*Leave Details:*\n- *Leave Type:* ${leave.leaveType}\n- *Start Date:* ${leave.from.date}\n- *End Date:* ${leave.to.date}\n- *Number of Days:* ${leave.leaveDays}\n- *Leave With Pay:* ${leave.numberOfDays}\n- *Loss of Pay:* ${leave.LOP}\n\nPlease take the necessary action either through your email or by logging into the LMS.\n\nBest Regards,\n*Gilbarco Veeder-Root*`
         );
         res.status(201).json({ message: "Leave applied successfully", leave });
-      }
-      else if(leaveType === "LOP"){
+      } else if (leaveType === "LOP") {
         const lop = await LeaveModel.findOne({ empId });
         const leave = new LeaveModel({
           empId,
@@ -213,15 +210,15 @@ const ApplyLeave = async (req, res) => {
         });
         await leave.save();
         res.status(201).json({ message: "Leave applied successfully", leave });
-      }
-      else {
+      } else {
         return res
           .status(400)
           .json({ message: "Permission Denied to Apply Leave" });
       }
-    }
-    else{
-      return res.status(500).json({ message: "Permission Denied to Apply Leave" });
+    } else {
+      return res
+        .status(500)
+        .json({ message: "Permission Denied to Apply Leave" });
     }
   } catch (error) {
     res.status(500).json({ message: "Server error", error });
@@ -733,6 +730,11 @@ const checkLeave = async (req, res) => {
         .status(202)
         .json({ mesasage: "Already leave had applied in the same day" });
     }
+    if (LeaveType === "LOP") {
+      res.status(200).json({
+        message: "You can take leave",
+      });
+    }
     if (role === "3P") {
       const cl = await CasualLeave.findOne({ empId: empId });
       if (1 - cl.availed >= numberOfDays) {
@@ -808,11 +810,11 @@ const GetLeave = async (req, res) => {
   try {
     const { empId } = req.body;
     const employee = await EmpModel.findOne({ empId });
-    if(!employee){
-      return res.status(404).json({ message: 'Employee not found' });
+    if (!employee) {
+      return res.status(404).json({ message: "Employee not found" });
     }
     if (employee.role === "Manager") {
-      const leaves = await LeaveModel.find({manager: employee.empName});
+      const leaves = await LeaveModel.find({ manager: employee.empName });
 
       res.status(200).json(leaves);
     } else {
@@ -847,18 +849,17 @@ const weakData = async (req, res) => {
   }
 };
 
-const gauge = async(req, res) => {
-  try{
+const gauge = async (req, res) => {
+  try {
     const { empId, employeeId } = req.body;
     const emp = await EmpModel.findOne({ empId });
-    const leaves = await LeaveModel.find({manager: emp.empName});
+    const leaves = await LeaveModel.find({ manager: emp.empName });
     const leave = await LeaveModel.find({ empId: employeeId });
-    res.status(200).json({all: leaves.length, emp: leave.length});
-  }
-  catch(err){
+    res.status(200).json({ all: leaves.length, emp: leave.length });
+  } catch (err) {
     res.status(500).json({ message: "Server error", err });
   }
-}
+};
 
 module.exports = {
   checkLeave,
@@ -873,5 +874,5 @@ module.exports = {
   GetLeave,
   cardData,
   weakData,
-  gauge
+  gauge,
 };
