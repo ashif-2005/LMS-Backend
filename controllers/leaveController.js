@@ -98,9 +98,9 @@ const ApplyLeave = async (req, res) => {
         const lop = await LeaveModel.findOne({ empId });
         const leave = new LeaveModel({
           empId,
-          empName: lop.empName,
-          role: lop.role,
-          manager: lop.manager,
+          empName: emp.empName,
+          role: emp.role,
+          manager: emp.manager,
           leaveType,
           from,
           to,
@@ -194,9 +194,9 @@ const ApplyLeave = async (req, res) => {
         const lop = await LeaveModel.findOne({ empId });
         const leave = new LeaveModel({
           empId,
-          empName: lop.empName,
-          role: lop.role,
-          manager: lop.manager,
+          empName: emp.empName,
+          role: emp.role,
+          manager: emp.manager,
           leaveType,
           from,
           to,
@@ -828,7 +828,7 @@ const GetLeave = async (req, res) => {
 
 const cardData = async (req, res) => {
   try {
-    const leaves = await LeaveModel.find({ today: `${year}/${month}/${date}` });
+    const leaves = await LeaveModel.find({ today: `${year}/${month}/${date}`, manager: employee.empName });
     res.status(200).json(leaves);
   } catch (err) {
     res.status(500).json({ message: "Server error", err });
@@ -842,6 +842,7 @@ const weakData = async (req, res) => {
         $gte: `${year}/${month}/${date - 7}`,
         $lte: `${year}/${month}/${date}`,
       },
+      manager: employee.empName
     });
     res.status(200).json(leaves);
   } catch (err) {
