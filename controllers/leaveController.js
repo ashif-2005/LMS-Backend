@@ -94,13 +94,36 @@ const ApplyLeave = async (req, res) => {
         });
         await leave.save();
         res.status(201).json({ message: "Leave applied successfully", leave });
-      } else {
+      }
+      else if (leaveType === "LOP") {
+        const lop = await LeaveModel.findOne({ empId });
+          const leave = new LeaveModel({
+            empId,
+            empName: lop.empName,
+            role: lop.role,
+            manager: lop.manager,
+            leaveType,
+            from,
+            to,
+            numberOfDays,
+            leaveDays,
+            days: list,
+            reasonType,
+            reason,
+            today: `${year}/${month}/${date}`,
+            LOP,
+          });
+          await leave.save();
+          res.status(201).json({ message: "Leave applied successfully", leave });
+      }
+      else {
         return res
           .status(400)
           .json({ message: "Permission Denied to Apply Leave" });
       }
-    } else {
+    } else if(emp.role === "GVR") {
       if (leaveType === "Casual Leave") {
+        console.log("check")
         const cl = await CasualLeave.findOne({ empId });
         const leave = new LeaveModel({
           empId,
@@ -169,11 +192,36 @@ const ApplyLeave = async (req, res) => {
           `Dear ${manager.empName},\n\nYou have received a new leave request from *${emp.empName}*.\n\n*Leave Details:*\n- *Leave Type:* ${leave.leaveType}\n- *Start Date:* ${leave.from.date}\n- *End Date:* ${leave.to.date}\n- *Number of Days:* ${leave.leaveDays}\n- *Leave With Pay:* ${leave.numberOfDays}\n- *Loss of Pay:* ${leave.LOP}\n\nPlease take the necessary action either through your email or by logging into the LMS.\n\nBest Regards,\n*Gilbarco Veeder-Root*`
         );
         res.status(201).json({ message: "Leave applied successfully", leave });
-      } else {
+      }
+      else if(leaveType === "LOP"){
+        const lop = await LeaveModel.findOne({ empId });
+        const leave = new LeaveModel({
+          empId,
+          empName: lop.empName,
+          role: lop.role,
+          manager: lop.manager,
+          leaveType,
+          from,
+          to,
+          numberOfDays,
+          leaveDays,
+          days: list,
+          reasonType,
+          reason,
+          today: `${year}/${month}/${date}`,
+          LOP,
+        });
+        await leave.save();
+        res.status(201).json({ message: "Leave applied successfully", leave });
+      }
+      else {
         return res
           .status(400)
           .json({ message: "Permission Denied to Apply Leave" });
       }
+    }
+    else{
+      return res.status(500).json({ message: "Permission Denied to Apply Leave" });
     }
   } catch (error) {
     res.status(500).json({ message: "Server error", error });
