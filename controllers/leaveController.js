@@ -187,6 +187,7 @@ const ApplyLeave = async (req, res) => {
         res.status(201).json({ message: "Leave applied successfully", leave });
       } else if (leaveType === "LOP") {
         const lop = await LeaveModel.findOne({ empId });
+        console.log("LOP")
         const leave = new LeaveModel({
           empId,
           empName: emp.empName,
@@ -338,13 +339,20 @@ const AcceptRejected = async (req, res) => {
         pl.LOP += leave.LOP;
         pl.closingBalance -= leave.numberOfDays;
         await pl.save();
-      } else {
+      } else if(leave.leaveType === "Adoption Leave"){
         const atpt = await AdoptionLeave.findById({ empId: leave.empId });
         adpt.availed += leave.numberOfDays;
         adpt.LOP += leave.LOP;
         adpt.closingBalance -= leave.numberOfDays;
         adpt.save();
+      }else {
+        const cl = await CasualLeave.findOne({ empId: leave.empId });
+        cl.availed += leave.numberOfDays;
+        cl.LOP += leave.LOP;
+        cl.closingBalance -= leave.numberOfDays;
+        await cl.save();
       }
+
       leave.status = "Approved";
       await leave.save();
       const emp = await EmpModel.findOne({ empId: leave.empId });
