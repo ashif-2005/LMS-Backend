@@ -276,12 +276,19 @@ const RejectAccepted = async (req, res) => {
         pl.LOP -= leave.LOP;
         pl.closingBalance += leave.numberOfDays;
         await pl.save();
-      } else {
+      } else if(leave.leaveType === "Adoption Leave") {
         const adpt = await AdoptionLeave.findById({ empId: leave.empId });
         adpt.availed -= leave.numberOfDays;
         adpt.LOP -= leave.LOP;
         adpt.closingBalance += leave.numberOfDays;
         adpt.save();
+      }
+      else{
+        const cl = await CasualLeave.findOne({ empId: leave.empId });
+        cl.availed -= leave.numberOfDays;
+        cl.LOP -= leave.LOP;
+        cl.closingBalance += leave.numberOfDays;
+        await cl.save();
       }
       leave.status = "Denied";
       await leave.save();
@@ -417,12 +424,19 @@ const AcceptLeave = async (req, res) => {
         pl.LOP += leave.LOP;
         pl.closingBalance -= leave.numberOfDays;
         await pl.save();
-      } else {
+      } else if(leave.leaveType === "Adoption Leave") {
         const atpt = await AdoptionLeave.findById({ empId: leave.empId });
         adpt.availed += leave.numberOfDays;
         adpt.LOP += leave.LOP;
         adpt.closingBalance -= leave.numberOfDays;
         adpt.save();
+      }
+      else{
+        const cl = await CasualLeave.findOne({ empId: leave.empId });
+        cl.availed += leave.numberOfDays;
+        cl.LOP += leave.LOP;
+        cl.closingBalance -= leave.numberOfDays;
+        await cl.save();
       }
       if (leave.status === "Pending") {
         leave.status = "Approved";
@@ -485,12 +499,19 @@ const Accept = async (req, res) => {
         pl.LOP += leave.LOP;
         pl.closingBalance -= leave.numberOfDays;
         await pl.save();
-      } else {
+      } else if(leave.leaveType === "Adoption Leave") {
         const atpt = await AdoptionLeave.findById({ empId: leave.empId });
         adpt.availed += leave.numberOfDays;
         adpt.LOP += leave.LOP;
         adpt.closingBalance -= leave.numberOfDays;
         adpt.save();
+      }
+      else{
+        const cl = await CasualLeave.findOne({ empId: leave.empId });
+        cl.availed += leave.numberOfDays;
+        cl.LOP += leave.LOP;
+        cl.closingBalance -= leave.numberOfDays;
+        await cl.save();
       }
       if (leave.status === "Pending") {
         leave.status = "Approved";
