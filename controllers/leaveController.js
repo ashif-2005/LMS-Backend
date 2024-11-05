@@ -824,8 +824,11 @@ const GetLeave = async (req, res) => {
 const cardData = async (req, res) => {
   try {
     const { empId } = req.body;
-    const employee = await EmpModel.findOne({ empId })
-    const leaves = await LeaveModel.find({ today: `${year}/${month}/${date}`, manager: employee.userName });
+    const employee = await EmpModel.findOne({ empId });
+    const leaves = await LeaveModel.find({
+      today: `${year}/${month}/${date}`,
+      manager: employee.userName,
+    });
     res.status(200).json(leaves);
   } catch (err) {
     res.status(500).json({ message: "Server error", err });
@@ -835,13 +838,13 @@ const cardData = async (req, res) => {
 const weakData = async (req, res) => {
   try {
     const { empId } = req.body;
-    const employee = await EmpModel.findOne({ empId })
+    const employee = await EmpModel.findOne({ empId });
     const leaves = await LeaveModel.find({
       today: {
         $gte: `${year}/${month}/${date - 7}`,
         $lte: `${year}/${month}/${date}`,
       },
-      manager: employee.userName
+      manager: employee.userName,
     });
     res.status(200).json(leaves);
   } catch (err) {
@@ -853,7 +856,7 @@ const gauge = async (req, res) => {
   try {
     const { empId, employeeId } = req.body;
     const emp = await EmpModel.findOne({ empId });
-    const leaves = await LeaveModel.find({ managerId: emp.userName });
+    const leaves = await LeaveModel.find({ manager: emp.userName });
     const leave = await LeaveModel.find({ empId: employeeId });
     res.status(200).json({ all: leaves.length, emp: leave.length });
   } catch (err) {

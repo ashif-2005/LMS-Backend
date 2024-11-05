@@ -129,9 +129,9 @@ const Register = async (req, res) => {
     }
 
     const empCount = await EmpModel.findOne().sort({ $natural: -1 }).limit(1);
-    console.log(empCount)
+    console.log(empCount);
     let count = parseInt(empCount.userName.slice(-3));
-    console.log(count)
+    console.log(count);
     count++;
     const userName =
       year.toString().substring(2, 4) +
@@ -425,31 +425,32 @@ const importEmp = async (req, res) => {
     if (!admin) {
       return res.status(404).json({ message: "Employee not found" });
     } else if (admin.role === "Admin") {
-      emp.forEach(async(obj) => {
+      for (const obj of emp) {
         const existingEmployee = await EmpModel.findOne({ empId: obj.empId });
         const existingPhone = await EmpModel.findOne({ empPhone: obj.empPhone });
         const existingMail = await EmpModel.findOne({ empMail: obj.empMail });
+
         if (existingEmployee || existingPhone || existingMail) {
           return res
             .status(400)
-            .json({ message: "Employee with this ID already exists" });
+            .json({ message: "Employee with this ID, phone, or email already exists" });
         }
-    
+
         const empCount = await EmpModel.findOne().sort({ $natural: -1 }).limit(1);
-        console.log(empCount)
-        let count = parseInt(empCount.userName.slice(-3));
-        console.log(count)
+        let count = empCount ? parseInt(empCount.userName.slice(-3)) : 0;
         count++;
         const userName =
-          year.toString().substring(2, 4) +
-          vendor +
+          new Date().getFullYear().toString().substring(2, 4) +
+          obj.vendor +
           count.toString().padStart(3, "0");
-        console.log(userName);
         const password = "user@123";
-    
+
         const hashedPassword = await bcrypt.hash(password, 10);
-    
-        const empManager = await EmpModel.findOne({ userName: managerId });
+
+        const empManager = await EmpModel.findOne({ userName: obj.managerId });
+        if (!empManager) {
+          return res.status(402).json({ message: "Manager not found" });
+        }
 
         const newEmployee = new EmpModel({
           empId: obj.empId,
@@ -465,7 +466,7 @@ const importEmp = async (req, res) => {
           manager: empManager.empName,
           reportingManager: empManager.empMail,
           dateOfJoining: obj.dateOfJoining,
-          function: obj.empFunction,
+          function: obj.function,
           department: obj.department,
           level: obj.level,
           location: obj.location,
@@ -474,20 +475,13 @@ const importEmp = async (req, res) => {
           isAdpt: obj.isAdpt,
         });
 
-        if (role === "GVR" || role === "3P") {
-          const data = await EmpModel.findOne({ userName: obj.managerId });
-          if (!data) {
-            return res.status(402).json({ message: "Manager not found" });
-          } else {
-            console.log("Adding employee...");
-            await EmpModel.findByIdAndUpdate(data._id, {
-              $push: { employees: empPhone },
-            });
-            console.log("employee added to the manager");
-          }
+        if (obj.role === "GVR" || obj.role === "3P") {
+          await EmpModel.findByIdAndUpdate(empManager._id, {
+            $push: { employees: obj.empPhone },
+          });
         }
 
-        if (isPaternity) {
+        if (obj.isPaternity) {
           const paternity = new PaternityLeave({
             empId: obj.empId,
             opBalance: 0,
@@ -497,8 +491,8 @@ const importEmp = async (req, res) => {
           });
           await paternity.save();
         }
-    
-        if (isAdpt) {
+
+        if (obj.isAdpt) {
           const Adpt = new AdoptionLeave({
             empId: obj.empId,
             opBalance: 0,
@@ -508,8 +502,8 @@ const importEmp = async (req, res) => {
           });
           await Adpt.save();
         }
-    
-        if (role === "3P") {
+
+        if (obj.role === "3P") {
           const cl = new CasualLeave({
             empId: obj.empId,
             opBalance: 0,
@@ -518,7 +512,7 @@ const importEmp = async (req, res) => {
             closingBalance: 12,
           });
           await cl.save();
-        } else if (role === "GVR") {
+        } else if (obj.role === "GVR") {
           const cl = new CasualLeave({
             empId: obj.empId,
             opBalance: 0,
@@ -526,7 +520,6 @@ const importEmp = async (req, res) => {
             totalEligibility: 10,
             closingBalance: 10,
           });
-    
           const pl = new PrivelageLeave({
             empId: obj.empId,
             opBalance: 0,
@@ -535,15 +528,13 @@ const importEmp = async (req, res) => {
             closingBalance: 16,
             carryForward: 16,
           });
-    
           await cl.save();
           await pl.save();
         }
-    
+
         await newEmployee.save();
-    
-        res.status(201).json({ message: "Employee registered successfully" });
-      });
+      }
+      res.status(201).json({ message: "Employee(s) registered successfully" });
     } else {
       return res.status(400).json({ message: "Permission Denied" });
     }
@@ -551,6 +542,7 @@ const importEmp = async (req, res) => {
     res.status(500).json({ message: "Server Error", error: err });
   }
 };
+
 
 const forgetPassword = async (req, res) => {
   try {
