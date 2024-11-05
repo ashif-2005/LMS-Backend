@@ -23,7 +23,6 @@ const addAdmin = async (req, res) => {
       vendor,
       gender,
       managerId,
-      designation,
       dateOfJoining,
       function: empFunction,
       department,
@@ -66,7 +65,6 @@ const addAdmin = async (req, res) => {
       gender,
       managerId: "000123654",
       manager: "HR",
-      designation,
       reportingManager: "hr@gmail.com",
       dateOfJoining,
       function: empFunction,
@@ -100,7 +98,6 @@ const Register = async (req, res) => {
       vendor,
       gender,
       managerId,
-      designation,
       dateOfJoining,
       function: empFunction,
       department,
@@ -152,7 +149,6 @@ const Register = async (req, res) => {
       gender,
       managerId,
       manager: empManager.empName,
-      designation,
       reportingManager: empManager.empMail,
       dateOfJoining,
       function: empFunction,
@@ -350,10 +346,7 @@ const updateEmpDetails = async (req, res) => {
       role,
       vendor,
       gender,
-      manager,
-      designation,
-      reportingManager,
-      dateOfJoining,
+      managerId,
       function: empFunction,
       department,
       level,
@@ -361,14 +354,13 @@ const updateEmpDetails = async (req, res) => {
       unit,
       isAdpt,
       isPaternity,
-      permissionEligible,
-      permissionAvailed,
     } = req.body;
     const admin = await EmpModel.findOne({ empId: id });
     if (!admin) {
       res.status(404).json({ message: "Employee not found" });
     } else if (admin.role === "Admin") {
       const emp = await EmpModel.findOne({ empId });
+      const man = await EmpModel.findOne({ userName: managerId });
       const updateEmpDetails = await EmpModel.updateOne(
         { empId: empId },
         {
@@ -378,10 +370,9 @@ const updateEmpDetails = async (req, res) => {
           role: role,
           vendor: vendor,
           gender: gender,
-          manager: manager,
-          designation: designation,
-          reportingManager: reportingManager,
-          dateOfJoining: dateOfJoining,
+          managerId: managerId,
+          manager: man.empName,
+          reportingManager: man.empMail,
           function: empFunction,
           department: department,
           level: level,
@@ -389,8 +380,6 @@ const updateEmpDetails = async (req, res) => {
           unit: unit,
           isAdpt: isAdpt,
           isPaternity: isPaternity,
-          permissionEligible: permissionEligible,
-          permissionAvailed: permissionAvailed,
         }
       );
       res

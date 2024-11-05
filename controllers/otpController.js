@@ -53,7 +53,7 @@ const verifyOTP = async(req, res) => {
       const hashedOTP = await bcrypt.hash(temp, 10);
       employee.otp = hashedOTP;
       await employee.save();
-    }, 40000);
+    }, 60000);
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "Server Error" });
