@@ -300,9 +300,6 @@ const GetPermission = async (req, res) => {
         }
         else{
             const permissions = await PermissionModel.find({ empId });
-        if (!permissions.length) {
-            return res.status(400).json({ message: 'No permissions found for this employee' });
-        }
         res.status(200).json(permissions);
         }
     } catch (error) {
