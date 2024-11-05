@@ -53,169 +53,188 @@ const ApplyLeave = async (req, res) => {
       return res.status(404).json({ message: "Employee not found" });
     }
 
-    if (emp.role === "3P") {
-      if (leaveType === "Casual Leave") {
-        const cl = await CasualLeave.findOne({ empId });
-        const leave = new LeaveModel({
-          empId,
-          empName: emp.empName,
-          role: emp.role,
-          manager: emp.managerId,
-          leaveType,
-          from,
-          to,
-          numberOfDays,
-          leaveDays,
-          days: list,
-          reasonType,
-          reason,
-          today: `${year}/${month}/${date}`,
-          LOP,
-        });
-        await leave.save();
-        res.status(201).json({ message: "Leave applied successfully", leave });
-      } else if (leaveType === "Paternity Leave" && emp.isPaternity) {
-        const pl = await PaternityLeave.findOne({ empId });
-        const leave = new LeaveModel({
-          empId,
-          empName: emp.empName,
-          role: emp.role,
-          manager: emp.managerId,
-          leaveType,
-          from,
-          to,
-          numberOfDays,
-          leaveDays,
-          days: list,
-          reasonType,
-          reason,
-          today: `${year}/${month}/${date}`,
-          LOP,
-        });
-        await leave.save();
-        res.status(201).json({ message: "Leave applied successfully", leave });
-      } else if (leaveType === "LOP") {
-        const lop = await LeaveModel.findOne({ empId });
-        const leave = new LeaveModel({
-          empId,
-          empName: emp.empName,
-          role: emp.role,
-          manager: emp.managerId,
-          leaveType,
-          from,
-          to,
-          numberOfDays,
-          leaveDays,
-          days: list,
-          reasonType,
-          reason,
-          today: `${year}/${month}/${date}`,
-          LOP,
-        });
-        await leave.save();
-        res.status(201).json({ message: "Leave applied successfully", leave });
-      } else {
-        return res
-          .status(400)
-          .json({ message: "Permission Denied to Apply Leave" });
-      }
-    } else if (emp.role === "GVR") {
-      if (leaveType === "Casual Leave") {
-        console.log("check");
-        const cl = await CasualLeave.findOne({ empId });
-        const leave = new LeaveModel({
-          empId,
-          empName: emp.empName,
-          role: emp.role,
-          manager: emp.managerId,
-          leaveType,
-          from,
-          to,
-          numberOfDays,
-          leaveDays,
-          days: list,
-          reasonType,
-          reason,
-          today: `${year}/${month}/${date}`,
-          LOP,
-        });
-        await leave.save();
-        res.status(201).json({ message: "Leave applied successfully", leave });
-      } else if (leaveType === "Privilege Leave") {
-        const pl = await PrivelageLeave.findOne({ empId });
-        if (pl.availed < 16) {
-          const leave = new LeaveModel({
-            empId,
-            empName: emp.empName,
-            role: emp.role,
-            manager: emp.managerId,
-            leaveType,
-            from,
-            to,
-            numberOfDays,
-            leaveDays,
-            days: list,
-            reasonType,
-            reason,
-            today: `${year}/${month}/${date}`,
-            LOP,
-          });
-          await leave.save();
-          res
-            .status(201)
-            .json({ message: "Leave applied successfully", leave });
-        }
-      } else if (leaveType === "Paternity Leave" && emp.isPaternity) {
-        const pl = await PaternityLeave.findOne({ empId });
-        const leave = new LeaveModel({
-          empId,
-          empName: emp.empName,
-          role: emp.role,
-          manager: emp.managerId,
-          leaveType,
-          from,
-          to,
-          numberOfDays,
-          leaveDays,
-          days: list,
-          reasonType,
-          reason,
-          today: `${year}/${month}/${date}`,
-          LOP,
-        });
-        await leave.save();
-        res.status(201).json({ message: "Leave applied successfully", leave });
-      } else if (leaveType === "LOP") {
-        const lop = await LeaveModel.findOne({ empId });
-        console.log("LOP")
-        const leave = new LeaveModel({
-          empId,
-          empName: emp.empName,
-          role: emp.role,
-          manager: emp.managerId,
-          leaveType,
-          from,
-          to,
-          numberOfDays,
-          leaveDays,
-          days: list,
-          reasonType,
-          reason,
-          today: `${year}/${month}/${date}`,
-          LOP,
-        });
-        await leave.save();
-        res.status(201).json({ message: "Leave applied successfully", leave });
-      } else {
-        return res
-          .status(400)
-          .json({ message: "Permission Denied to Apply Leave" });
-      }
-    } else {
-      return res
-        .status(500)
-        .json({ message: "Permission Denied to Apply Leave" });
-    }
+    const leave = new LeaveModel({
+      empId,
+      empName: emp.empName,
+      role: emp.role,
+      manager: emp.managerId,
+      leaveType,
+      from,
+      to,
+      numberOfDays,
+      leaveDays,
+      days: list,
+      reasonType,
+      reason,
+      today: `${year}/${month}/${date}`,
+      LOP,
+    });
+    await leave.save();
+    res.status(201).json({ message: "Leave applied successfully", leave });
+
+    // if (emp.role === "3P") {
+    //   if (leaveType === "Casual Leave") {
+    //     const cl = await CasualLeave.findOne({ empId });
+    //     const leave = new LeaveModel({
+    //       empId,
+    //       empName: emp.empName,
+    //       role: emp.role,
+    //       manager: emp.managerId,
+    //       leaveType,
+    //       from,
+    //       to,
+    //       numberOfDays,
+    //       leaveDays,
+    //       days: list,
+    //       reasonType,
+    //       reason,
+    //       today: `${year}/${month}/${date}`,
+    //       LOP,
+    //     });
+    //     await leave.save();
+    //     res.status(201).json({ message: "Leave applied successfully", leave });
+    //   } else if (leaveType === "Paternity Leave" && emp.isPaternity) {
+    //     const pl = await PaternityLeave.findOne({ empId });
+    //     const leave = new LeaveModel({
+    //       empId,
+    //       empName: emp.empName,
+    //       role: emp.role,
+    //       manager: emp.managerId,
+    //       leaveType,
+    //       from,
+    //       to,
+    //       numberOfDays,
+    //       leaveDays,
+    //       days: list,
+    //       reasonType,
+    //       reason,
+    //       today: `${year}/${month}/${date}`,
+    //       LOP,
+    //     });
+    //     await leave.save();
+    //     res.status(201).json({ message: "Leave applied successfully", leave });
+    //   } else if (leaveType === "LOP") {
+    //     const lop = await LeaveModel.findOne({ empId });
+    //     const leave = new LeaveModel({
+    //       empId,
+    //       empName: emp.empName,
+    //       role: emp.role,
+    //       manager: emp.managerId,
+    //       leaveType,
+    //       from,
+    //       to,
+    //       numberOfDays,
+    //       leaveDays,
+    //       days: list,
+    //       reasonType,
+    //       reason,
+    //       today: `${year}/${month}/${date}`,
+    //       LOP,
+    //     });
+    //     await leave.save();
+    //     res.status(201).json({ message: "Leave applied successfully", leave });
+    //   } else {
+    //     return res
+    //       .status(400)
+    //       .json({ message: "Permission Denied to Apply Leave" });
+    //   }
+    // } else if (emp.role === "GVR") {
+    //   if (leaveType === "Casual Leave") {
+    //     console.log("check");
+    //     const cl = await CasualLeave.findOne({ empId });
+    //     const leave = new LeaveModel({
+    //       empId,
+    //       empName: emp.empName,
+    //       role: emp.role,
+    //       manager: emp.managerId,
+    //       leaveType,
+    //       from,
+    //       to,
+    //       numberOfDays,
+    //       leaveDays,
+    //       days: list,
+    //       reasonType,
+    //       reason,
+    //       today: `${year}/${month}/${date}`,
+    //       LOP,
+    //     });
+    //     await leave.save();
+    //     res.status(201).json({ message: "Leave applied successfully", leave });
+    //   } else if (leaveType === "Privilege Leave") {
+    //     const pl = await PrivelageLeave.findOne({ empId });
+    //     if (pl.availed < 16) {
+    //       const leave = new LeaveModel({
+    //         empId,
+    //         empName: emp.empName,
+    //         role: emp.role,
+    //         manager: emp.managerId,
+    //         leaveType,
+    //         from,
+    //         to,
+    //         numberOfDays,
+    //         leaveDays,
+    //         days: list,
+    //         reasonType,
+    //         reason,
+    //         today: `${year}/${month}/${date}`,
+    //         LOP,
+    //       });
+    //       await leave.save();
+    //       res
+    //         .status(201)
+    //         .json({ message: "Leave applied successfully", leave });
+    //     }
+    //   } else if (leaveType === "Paternity Leave" && emp.isPaternity) {
+    //     const pl = await PaternityLeave.findOne({ empId });
+    //     const leave = new LeaveModel({
+    //       empId,
+    //       empName: emp.empName,
+    //       role: emp.role,
+    //       manager: emp.managerId,
+    //       leaveType,
+    //       from,
+    //       to,
+    //       numberOfDays,
+    //       leaveDays,
+    //       days: list,
+    //       reasonType,
+    //       reason,
+    //       today: `${year}/${month}/${date}`,
+    //       LOP,
+    //     });
+    //     await leave.save();
+    //     res.status(201).json({ message: "Leave applied successfully", leave });
+    //   } else if (leaveType === "LOP") {
+    //     const lop = await LeaveModel.findOne({ empId });
+    //     console.log("LOP")
+    //     const leave = new LeaveModel({
+    //       empId,
+    //       empName: emp.empName,
+    //       role: emp.role,
+    //       manager: emp.managerId,
+    //       leaveType,
+    //       from,
+    //       to,
+    //       numberOfDays,
+    //       leaveDays,
+    //       days: list,
+    //       reasonType,
+    //       reason,
+    //       today: `${year}/${month}/${date}`,
+    //       LOP,
+    //     });
+    //     await leave.save();
+    //     res.status(201).json({ message: "Leave applied successfully", leave });
+    //   } else {
+    //     return res
+    //       .status(400)
+    //       .json({ message: "Permission Denied to Apply Leave" });
+    //   }
+    // } else {
+    //   return res
+    //     .status(500)
+    //     .json({ message: "Permission Denied to Apply Leave" });
+    // }
   } catch (error) {
     res.status(500).json({ message: "Server error", error });
   }
@@ -276,14 +295,13 @@ const RejectAccepted = async (req, res) => {
         pl.LOP -= leave.LOP;
         pl.closingBalance += leave.numberOfDays;
         await pl.save();
-      } else if(leave.leaveType === "Adoption Leave") {
+      } else if (leave.leaveType === "Adoption Leave") {
         const adpt = await AdoptionLeave.findById({ empId: leave.empId });
         adpt.availed -= leave.numberOfDays;
         adpt.LOP -= leave.LOP;
         adpt.closingBalance += leave.numberOfDays;
         adpt.save();
-      }
-      else{
+      } else {
         const cl = await CasualLeave.findOne({ empId: leave.empId });
         cl.availed -= leave.numberOfDays;
         cl.LOP -= leave.LOP;
@@ -346,13 +364,13 @@ const AcceptRejected = async (req, res) => {
         pl.LOP += leave.LOP;
         pl.closingBalance -= leave.numberOfDays;
         await pl.save();
-      } else if(leave.leaveType === "Adoption Leave"){
+      } else if (leave.leaveType === "Adoption Leave") {
         const atpt = await AdoptionLeave.findById({ empId: leave.empId });
         adpt.availed += leave.numberOfDays;
         adpt.LOP += leave.LOP;
         adpt.closingBalance -= leave.numberOfDays;
         adpt.save();
-      }else {
+      } else {
         const cl = await CasualLeave.findOne({ empId: leave.empId });
         cl.availed += leave.numberOfDays;
         cl.LOP += leave.LOP;
@@ -424,14 +442,13 @@ const AcceptLeave = async (req, res) => {
         pl.LOP += leave.LOP;
         pl.closingBalance -= leave.numberOfDays;
         await pl.save();
-      } else if(leave.leaveType === "Adoption Leave") {
+      } else if (leave.leaveType === "Adoption Leave") {
         const atpt = await AdoptionLeave.findById({ empId: leave.empId });
         adpt.availed += leave.numberOfDays;
         adpt.LOP += leave.LOP;
         adpt.closingBalance -= leave.numberOfDays;
         adpt.save();
-      }
-      else{
+      } else {
         const cl = await CasualLeave.findOne({ empId: leave.empId });
         cl.availed += leave.numberOfDays;
         cl.LOP += leave.LOP;
@@ -499,14 +516,13 @@ const Accept = async (req, res) => {
         pl.LOP += leave.LOP;
         pl.closingBalance -= leave.numberOfDays;
         await pl.save();
-      } else if(leave.leaveType === "Adoption Leave") {
+      } else if (leave.leaveType === "Adoption Leave") {
         const atpt = await AdoptionLeave.findById({ empId: leave.empId });
         adpt.availed += leave.numberOfDays;
         adpt.LOP += leave.LOP;
         adpt.closingBalance -= leave.numberOfDays;
         adpt.save();
-      }
-      else{
+      } else {
         const cl = await CasualLeave.findOne({ empId: leave.empId });
         cl.availed += leave.numberOfDays;
         cl.LOP += leave.LOP;
@@ -754,11 +770,13 @@ const checkLeave = async (req, res) => {
         .status(202)
         .json({ mesasage: "Already leave had applied in the same day" });
     }
+
     if (LeaveType === "LOP") {
       res.status(200).json({
         message: "You can take leave",
       });
     }
+    
     if (role === "3P") {
       const cl = await CasualLeave.findOne({ empId: empId });
       if (1 - cl.availed >= numberOfDays) {
@@ -885,8 +903,14 @@ const gauge = async (req, res) => {
   try {
     const { empId, employeeId } = req.body;
     const emp = await EmpModel.findOne({ empId });
-    const leaves = await LeaveModel.find({ manager: emp.userName, status: "Approved" });
-    const leave = await LeaveModel.find({ empId: employeeId, status: "Approved"});
+    const leaves = await LeaveModel.find({
+      manager: emp.userName,
+      status: "Approved",
+    });
+    const leave = await LeaveModel.find({
+      empId: employeeId,
+      status: "Approved",
+    });
     res.status(200).json({ all: leaves.length, emp: leave.length });
   } catch (err) {
     res.status(500).json({ message: "Server error", err });
