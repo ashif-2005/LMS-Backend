@@ -452,6 +452,9 @@ const importEmp = async (req, res) => {
           return res.status(402).json({ message: "Manager not found" });
         }
 
+        let pat = obj.isPaternity.toLowerCase() === "true";
+        let adpt = obj.isAdpt.toLowerCase() === "true";
+
         const newEmployee = new EmpModel({
           empId: obj.empId,
           userName,
@@ -471,8 +474,8 @@ const importEmp = async (req, res) => {
           level: obj.level,
           location: obj.location,
           unit: obj.unit,
-          isPaternity: obj.isPaternity,
-          isAdpt: obj.isAdpt,
+          isPaternity: pat,
+          isAdpt: adpt,
         });
 
         if (obj.role === "GVR" || obj.role === "3P") {
@@ -481,7 +484,7 @@ const importEmp = async (req, res) => {
           });
         }
 
-        if (obj.isPaternity) {
+        if (pat) {
           const paternity = new PaternityLeave({
             empId: obj.empId,
             opBalance: 0,
@@ -492,7 +495,7 @@ const importEmp = async (req, res) => {
           await paternity.save();
         }
 
-        if (obj.isAdpt) {
+        if (adpt) {
           const Adpt = new AdoptionLeave({
             empId: obj.empId,
             opBalance: 0,
