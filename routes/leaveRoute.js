@@ -12,8 +12,8 @@ router.post('/getLeave', checkUser, GetLeave)
 router.post('/cancelLeave',checkUser,withDrawLeave)
 router.post('/acceptRejected',checkUser,AcceptRejected)
 router.post('/rejectAccepted',checkUser,RejectAccepted)
-router.get('/cardData',checkUser,cardData)
-router.get('/weekData',checkUser,weakData)
+router.post('/cardData',checkUser,cardData)
+router.post('/weekData',checkUser,weakData)
 router.post('/gauge',checkUser,gauge)
 
 module.exports = router;

@@ -8,21 +8,22 @@ const { PrivelageLeave } = require("../models/privelageLeaveSchema");
 const { PaternityLeave } = require("../models/paternityLeaveSchema");
 const { AdoptionLeave } = require("../models/adoptionLeaveModel");
 
+const today = new Date();
+const year = today.getFullYear();
+let count = 0;
+
 const addAdmin = async (req, res) => {
   try {
     const {
       empId,
-      userName,
-      password,
       empName,
       empMail,
       empPhone,
       role,
       vendor,
       gender,
-      manager,
+      managerId,
       designation,
-      reportingManager,
       dateOfJoining,
       function: empFunction,
       department,
@@ -34,17 +35,25 @@ const addAdmin = async (req, res) => {
       permissionEligible,
       permissionAvailed,
     } = req.body;
+
+    // Check if employee already exists
     const existingEmployee = await EmpModel.findOne({ empId });
     if (existingEmployee) {
-      return res
-        .status(400)
-        .json({ message: "Employee with this ID already exists" });
+      return res.status(400).json({ message: "Employee already exists" });
     }
-    const existingUser = await EmpModel.findOne({ userName });
-    if (existingUser) {
-      return res.status(400).json({ message: "User ID already exists" });
-    }
+
+    console.log("check");
+
+    count++;
+    const userName =
+      year.toString().substring(2, 4) +
+      "GVRADMIN" +
+      count.toString().padStart(3, "0");
+    const password = "admin@123";
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    console.log(userName);
+
     const newEmployee = new EmpModel({
       empId,
       userName,
@@ -55,9 +64,10 @@ const addAdmin = async (req, res) => {
       role,
       vendor,
       gender,
-      manager,
+      managerId: "000123654",
+      manager: "HR",
       designation,
-      reportingManager,
+      reportingManager: "hr@gmail.com",
       dateOfJoining,
       function: empFunction,
       department,
@@ -69,10 +79,11 @@ const addAdmin = async (req, res) => {
       permissionEligible,
       permissionAvailed,
     });
+
     await newEmployee.save();
-    res.status(201).json({ message: "Employee registered successfully" });
+    res.status(201).json({ message: "Admin created successfully" });
   } catch (err) {
-    res.status(500).json({ message: "Server Error" });
+    res.status(500).json({ message: "Server Error", err });
   }
 };
 
@@ -82,17 +93,14 @@ const Register = async (req, res) => {
     const {
       id,
       empId,
-      userName,
-      password,
       empName,
       empMail,
       empPhone,
       role,
       vendor,
       gender,
-      manager,
+      managerId,
       designation,
-      reportingManager,
       dateOfJoining,
       function: empFunction,
       department,
@@ -122,12 +130,14 @@ const Register = async (req, res) => {
         .json({ message: "Employee with this ID already exists" });
     }
 
-    const existingUser = await EmpModel.findOne({ userName });
-    if (existingUser) {
-      return res.status(400).json({ message: "User ID already exists" });
-    }
+    count++;
+    const userName = year.toString().substring(2, 4) + vendor + count.toString().padStart(3, "0");
+    console.log(userName);
+    const password = "user@123";
 
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    const empManager = await EmpModel.findOne({ userName: managerId });
 
     // Create new employee
     const newEmployee = new EmpModel({
@@ -140,9 +150,10 @@ const Register = async (req, res) => {
       role,
       vendor,
       gender,
-      manager,
+      managerId,
+      manager: empManager.empName,
       designation,
-      reportingManager,
+      reportingManager: empManager.empMail,
       dateOfJoining,
       function: empFunction,
       department,
@@ -156,7 +167,7 @@ const Register = async (req, res) => {
     });
 
     if (role === "GVR" || role === "3P") {
-      const data = await EmpModel.findOne({ empName: manager });
+      const data = await EmpModel.findOne({ userName: managerId });
       if (!data) {
         return res.status(402).json({ message: "Manager not found" });
       } else {

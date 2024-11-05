@@ -60,7 +60,7 @@ const ApplyLeave = async (req, res) => {
           empId,
           empName: emp.empName,
           role: emp.role,
-          manager: emp.manager,
+          manager: emp.managerId,
           leaveType,
           from,
           to,
@@ -80,7 +80,7 @@ const ApplyLeave = async (req, res) => {
           empId,
           empName: emp.empName,
           role: emp.role,
-          manager: emp.manager,
+          manager: emp.managerId,
           leaveType,
           from,
           to,
@@ -100,7 +100,7 @@ const ApplyLeave = async (req, res) => {
           empId,
           empName: emp.empName,
           role: emp.role,
-          manager: emp.manager,
+          manager: emp.managerId,
           leaveType,
           from,
           to,
@@ -127,7 +127,7 @@ const ApplyLeave = async (req, res) => {
           empId,
           empName: emp.empName,
           role: emp.role,
-          manager: emp.manager,
+          manager: emp.managerId,
           leaveType,
           from,
           to,
@@ -148,7 +148,7 @@ const ApplyLeave = async (req, res) => {
             empId,
             empName: emp.empName,
             role: emp.role,
-            manager: emp.manager,
+            manager: emp.managerId,
             leaveType,
             from,
             to,
@@ -171,7 +171,7 @@ const ApplyLeave = async (req, res) => {
           empId,
           empName: emp.empName,
           role: emp.role,
-          manager: emp.manager,
+          manager: emp.managerId,
           leaveType,
           from,
           to,
@@ -184,11 +184,6 @@ const ApplyLeave = async (req, res) => {
           LOP,
         });
         await leave.save();
-        const manager = await EmpModel.findOne({ manager: emp.manager });
-        Message(
-          manager.empPhone,
-          `Dear ${manager.empName},\n\nYou have received a new leave request from *${emp.empName}*.\n\n*Leave Details:*\n- *Leave Type:* ${leave.leaveType}\n- *Start Date:* ${leave.from.date}\n- *End Date:* ${leave.to.date}\n- *Number of Days:* ${leave.leaveDays}\n- *Leave With Pay:* ${leave.numberOfDays}\n- *Loss of Pay:* ${leave.LOP}\n\nPlease take the necessary action either through your email or by logging into the LMS.\n\nBest Regards,\n*Gilbarco Veeder-Root*`
-        );
         res.status(201).json({ message: "Leave applied successfully", leave });
       } else if (leaveType === "LOP") {
         const lop = await LeaveModel.findOne({ empId });
@@ -196,7 +191,7 @@ const ApplyLeave = async (req, res) => {
           empId,
           empName: emp.empName,
           role: emp.role,
-          manager: emp.manager,
+          manager: emp.managerId,
           leaveType,
           from,
           to,
@@ -814,7 +809,7 @@ const GetLeave = async (req, res) => {
       return res.status(404).json({ message: "Employee not found" });
     }
     if (employee.role === "Manager") {
-      const leaves = await LeaveModel.find({ manager: employee.empName });
+      const leaves = await LeaveModel.find({ manager: employee.userName });
 
       res.status(200).json(leaves);
     } else {
@@ -828,7 +823,9 @@ const GetLeave = async (req, res) => {
 
 const cardData = async (req, res) => {
   try {
-    const leaves = await LeaveModel.find({ today: `${year}/${month}/${date}`, manager: employee.empName });
+    const { empId } = req.body;
+    const employee = await EmpModel.findOne({ empId })
+    const leaves = await LeaveModel.find({ today: `${year}/${month}/${date}`, manager: employee.userName });
     res.status(200).json(leaves);
   } catch (err) {
     res.status(500).json({ message: "Server error", err });
@@ -837,12 +834,14 @@ const cardData = async (req, res) => {
 
 const weakData = async (req, res) => {
   try {
+    const { empId } = req.body;
+    const employee = await EmpModel.findOne({ empId })
     const leaves = await LeaveModel.find({
       today: {
         $gte: `${year}/${month}/${date - 7}`,
         $lte: `${year}/${month}/${date}`,
       },
-      manager: employee.empName
+      manager: employee.userName
     });
     res.status(200).json(leaves);
   } catch (err) {
@@ -854,7 +853,7 @@ const gauge = async (req, res) => {
   try {
     const { empId, employeeId } = req.body;
     const emp = await EmpModel.findOne({ empId });
-    const leaves = await LeaveModel.find({ manager: emp.empName });
+    const leaves = await LeaveModel.find({ manager: emp.userName });
     const leave = await LeaveModel.find({ empId: employeeId });
     res.status(200).json({ all: leaves.length, emp: leave.length });
   } catch (err) {

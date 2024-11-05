@@ -48,6 +48,10 @@ const schema = new db.Schema(
             enum: ['Male', 'Female', 'Other'],
             default: 'Male'
         },
+        managerId: {
+            type: String,
+            required: true
+        },
         manager: {
             type: String,
             required: true
