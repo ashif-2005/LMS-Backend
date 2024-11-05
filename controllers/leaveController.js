@@ -853,7 +853,7 @@ const gauge = async (req, res) => {
   try {
     const { empId, employeeId } = req.body;
     const emp = await EmpModel.findOne({ empId });
-    const leaves = await LeaveModel.find({ manager: emp.userName });
+    const leaves = await LeaveModel.find({ managerId: emp.userName });
     const leave = await LeaveModel.find({ empId: employeeId });
     res.status(200).json({ all: leaves.length, emp: leave.length });
   } catch (err) {

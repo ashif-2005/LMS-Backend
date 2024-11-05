@@ -425,8 +425,125 @@ const importEmp = async (req, res) => {
     if (!admin) {
       return res.status(404).json({ message: "Employee not found" });
     } else if (admin.role === "Admin") {
-      await EmpModel.insertMany(emp);
-      res.status(200).json({ message: "Employees imported successfully" });
+      emp.forEach(async(obj) => {
+        const existingEmployee = await EmpModel.findOne({ empId: obj.empId });
+        const existingPhone = await EmpModel.findOne({ empPhone: obj.empPhone });
+        const existingMail = await EmpModel.findOne({ empMail: obj.empMail });
+        if (existingEmployee || existingPhone || existingMail) {
+          return res
+            .status(400)
+            .json({ message: "Employee with this ID already exists" });
+        }
+    
+        const empCount = await EmpModel.findOne().sort({ $natural: -1 }).limit(1);
+        console.log(empCount)
+        let count = parseInt(empCount.userName.slice(-3));
+        console.log(count)
+        count++;
+        const userName =
+          year.toString().substring(2, 4) +
+          vendor +
+          count.toString().padStart(3, "0");
+        console.log(userName);
+        const password = "user@123";
+    
+        const hashedPassword = await bcrypt.hash(password, 10);
+    
+        const empManager = await EmpModel.findOne({ userName: managerId });
+
+        const newEmployee = new EmpModel({
+          empId: obj.empId,
+          userName,
+          password: hashedPassword,
+          empName: obj.empName,
+          empMail: obj.empMail,
+          empPhone: "+91" + obj.empPhone,
+          role: obj.role,
+          vendor: obj.vendor,
+          gender: obj.gender,
+          managerId: obj.managerId,
+          manager: empManager.empName,
+          reportingManager: empManager.empMail,
+          dateOfJoining: obj.dateOfJoining,
+          function: obj.empFunction,
+          department: obj.department,
+          level: obj.level,
+          location: obj.location,
+          unit: obj.unit,
+          isPaternity: obj.isPaternity,
+          isAdpt: obj.isAdpt,
+        });
+
+        if (role === "GVR" || role === "3P") {
+          const data = await EmpModel.findOne({ userName: obj.managerId });
+          if (!data) {
+            return res.status(402).json({ message: "Manager not found" });
+          } else {
+            console.log("Adding employee...");
+            await EmpModel.findByIdAndUpdate(data._id, {
+              $push: { employees: empPhone },
+            });
+            console.log("employee added to the manager");
+          }
+        }
+
+        if (isPaternity) {
+          const paternity = new PaternityLeave({
+            empId: obj.empId,
+            opBalance: 0,
+            credit: 5,
+            totalEligibility: 5,
+            closingBalance: 5,
+          });
+          await paternity.save();
+        }
+    
+        if (isAdpt) {
+          const Adpt = new AdoptionLeave({
+            empId: obj.empId,
+            opBalance: 0,
+            credit: 42,
+            totalEligibility: 42,
+            closingBalance: 42,
+          });
+          await Adpt.save();
+        }
+    
+        if (role === "3P") {
+          const cl = new CasualLeave({
+            empId: obj.empId,
+            opBalance: 0,
+            credit: 12,
+            totalEligibility: 12,
+            closingBalance: 12,
+          });
+          await cl.save();
+        } else if (role === "GVR") {
+          const cl = new CasualLeave({
+            empId: obj.empId,
+            opBalance: 0,
+            credit: 10,
+            totalEligibility: 10,
+            closingBalance: 10,
+          });
+    
+          const pl = new PrivelageLeave({
+            empId: obj.empId,
+            opBalance: 0,
+            credit: 16,
+            totalEligibility: 16,
+            closingBalance: 16,
+            carryForward: 16,
+          });
+    
+          await cl.save();
+          await pl.save();
+        }
+    
+        await newEmployee.save();
+    
+        res.status(201).json({ message: "Employee registered successfully" });
+      });
     } else {
       return res.status(400).json({ message: "Permission Denied" });
     }
