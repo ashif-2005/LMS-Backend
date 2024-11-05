@@ -325,7 +325,7 @@ const getAllEmp = async (req, res) => {
       return res.status(404).json({ message: "Employee not found" });
     }
     if (employee.role === "Manager") {
-      const emp = await EmpModel.find({ manager: employee.empName });
+      const emp = await EmpModel.find({ manager: employee.userName });
       res.status(200).json(emp);
     } else if (employee.role === "Admin") {
       const emp = await EmpModel.find({});
