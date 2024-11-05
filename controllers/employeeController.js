@@ -10,7 +10,6 @@ const { AdoptionLeave } = require("../models/adoptionLeaveModel");
 
 const today = new Date();
 const year = today.getFullYear();
-let count = 0;
 
 const addAdmin = async (req, res) => {
   try {
@@ -112,6 +111,8 @@ const Register = async (req, res) => {
 
     // Check if employee already exists
     const existingEmployee = await EmpModel.findOne({ empId });
+    const existingPhone = await EmpModel.findOne({ empPhone });
+    const existingMail = await EmpModel.findOne({ empMail });
     const emp = await EmpModel.findOne({ empId: id });
     if (!emp) {
       return res.status(404).json({ message: "Employee not found" });
@@ -121,14 +122,21 @@ const Register = async (req, res) => {
         .status(403)
         .json({ message: "Only Admin can create new employee" });
     }
-    if (existingEmployee) {
+    if (existingEmployee || existingPhone || existingMail) {
       return res
         .status(400)
         .json({ message: "Employee with this ID already exists" });
     }
 
+    const empCount = await EmpModel.findOne().sort({ $natural: -1 }).limit(1);
+    console.log(empCount)
+    let count = parseInt(empCount.userName.slice(-3));
+    console.log(count)
     count++;
-    const userName = year.toString().substring(2, 4) + vendor + count.toString().padStart(3, "0");
+    const userName =
+      year.toString().substring(2, 4) +
+      vendor +
+      count.toString().padStart(3, "0");
     console.log(userName);
     const password = "user@123";
 
@@ -143,7 +151,7 @@ const Register = async (req, res) => {
       password: hashedPassword,
       empName,
       empMail,
-      empPhone,
+      empPhone: "+91" + empPhone,
       role,
       vendor,
       gender,
