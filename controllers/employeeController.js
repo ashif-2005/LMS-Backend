@@ -408,8 +408,27 @@ const deleteEmp = async (req, res) => {
     if (!admin) {
       return res.status(404).json({ message: "Employee not found" });
     } else if (admin.role === "Admin") {
-      const emp = await EmpModel.findOneAndDelete({ empId });
-      res.status(200).json({ message: "Employee deleted successfully" });
+      const emp = await EmpModel.findOne({ empId })
+      if(!emp){
+        return res.status(404).json({ message: "Employee not found" });
+      }
+      else{
+        if(emp.role === "3P"){
+          await CasualLeave.findOneAndDelete({ empId });
+        }
+        else if(emp.role === "GVR"){
+          await CasualLeave.findOneAndDelete({ empId });
+          await PrivelageLeave.findOneAndDelete({ empId });
+          if(emp.isAdpt){
+            await AdoptionLeave.findOneAndDelete({ empId });
+          }
+          else if(emp.isPaternity){
+            await PaternityLeave.findOneAndDelete({ empId });
+          }
+        }
+        await EmpModel.findOneAndDelete({ empId });
+        res.status(200).json({ message: "Employee deleted successfully" });
+      }
     } else {
       return res.status(400).json({ message: "Permission Denied" });
     }
@@ -421,10 +440,12 @@ const deleteEmp = async (req, res) => {
 const importEmp = async (req, res) => {
   try {
     const { id, emp } = req.body;
+    console.log(id)
     const admin = await EmpModel.findOne({ empId: id });
     if (!admin) {
       return res.status(404).json({ message: "Employee not found" });
     } else if (admin.role === "Admin") {
+      console.log("admin")
       for (const obj of emp) {
         const existingEmployee = await EmpModel.findOne({ empId: obj.empId });
         const existingPhone = await EmpModel.findOne({ empPhone: obj.empPhone });
@@ -445,15 +466,14 @@ const importEmp = async (req, res) => {
           count.toString().padStart(3, "0");
         const password = "user@123";
 
+
+
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const empManager = await EmpModel.findOne({ userName: obj.managerId });
         if (!empManager) {
           return res.status(402).json({ message: "Manager not found" });
         }
-
-        let pat = obj.isPaternity.toLowerCase() === "true";
-        let adpt = obj.isAdpt.toLowerCase() === "true";
 
         const newEmployee = new EmpModel({
           empId: obj.empId,
@@ -474,8 +494,8 @@ const importEmp = async (req, res) => {
           level: obj.level,
           location: obj.location,
           unit: obj.unit,
-          isPaternity: pat,
-          isAdpt: adpt,
+          isPaternity: obj.isPaternity,
+          isAdpt: obj.isAdpt,
         });
 
         if (obj.role === "GVR" || obj.role === "3P") {
@@ -484,7 +504,7 @@ const importEmp = async (req, res) => {
           });
         }
 
-        if (pat) {
+        if (obj.isPaternity) {
           const paternity = new PaternityLeave({
             empId: obj.empId,
             opBalance: 0,
@@ -495,7 +515,7 @@ const importEmp = async (req, res) => {
           await paternity.save();
         }
 
-        if (adpt) {
+        if (obj.isAdpt) {
           const Adpt = new AdoptionLeave({
             empId: obj.empId,
             opBalance: 0,
