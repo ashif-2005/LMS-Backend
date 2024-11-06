@@ -622,8 +622,12 @@ const Accept = async (req, res) => {
           }
         }
         else if(leave.numberOfDays === 2){
-          cl.available[leave.from.date.slice(3,5)] -= 1
-          cl.available[leave.to.date.slice(3,5)] -= 1
+          const data1 = cl.available[leave.from.date.slice(3,5)] - 1
+          const data2 = cl.available[leave.to.date.slice(3,5)] - 1
+          await CasualLeave.updateOne(
+            { empId: leave.empId }, // filter to find the specific document
+            { $set: { [`available.${leave.from.date.slice(3,5)}`]: data1, [`available.${leave.to.date.slice(3,5)}`]: data2 } } // dynamically set "available.key" to 0
+          );
         }
         await cl.save();
       } else if (leave.leaveType === "Casual Leave" && leave.role === "GVR") {
