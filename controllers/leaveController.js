@@ -1407,7 +1407,6 @@ const gauge = async (req, res) => {
         }
       }
     ]);
-
     const leave = await LeaveModel.aggregate([
       {
         $match: { empId: employeeId, status: "Approved", } 
@@ -1419,7 +1418,11 @@ const gauge = async (req, res) => {
         }
       }
     ]);
-    res.status(200).json({ all: leaves[0].totalDays, emp: leave[0].totalDays });
+
+    const data1 = leaves.length == 0 ? 0 : leaves[0].totalDays
+    const data2 = leave.length == 0 ? 0 : leave[0].totalDays
+
+    res.status(200).json({ all: data1, emp: data2 });
   } catch (err) {
     res.status(500).json({ message: "Server error", err });
   }
