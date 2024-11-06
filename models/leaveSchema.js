@@ -72,7 +72,7 @@ const schema = new db.Schema(
     LOP: {
       type: Number,
       default: 0,
-    },
+    }
   },
   {
     timestamps: true,

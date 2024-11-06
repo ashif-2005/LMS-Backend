@@ -274,6 +274,23 @@ const RejectAccepted = async (req, res) => {
         cl.availed -= leave.numberOfDays;
         cl.LOP -= leave.LOP;
         cl.closingBalance += leave.numberOfDays;
+        if(leave.numberOfDays === 1){
+          cl.available[leave.from.date.slice(3,5)] += leave.numberOfDays
+        }
+        else if(leave.numberOfDays === 1.5){
+          if(leave.from.firstHalf && leave.from.secondHalf){
+            cl.available[leave.from.date.slice(3,5)] += 1
+            cl.available[leave.to.date.slice(3,5)] += 0.5
+          }
+          else{
+            cl.available[leave.from.date.slice(3,5)] += 0.5
+            cl.available[leave.to.date.slice(3,5)] += 1
+          }
+        }
+        else if(leave.numberOfDays === 2){
+          cl.available[leave.from.date.slice(3,5)] += 1
+          cl.available[leave.to.date.slice(3,5)] += 1
+        }
         await cl.save();
       } else if (leave.leaveType === "Casual Leave" && leave.role === "GVR") {
         console.log("CL");
@@ -343,6 +360,23 @@ const AcceptRejected = async (req, res) => {
         cl.availed += leave.numberOfDays;
         cl.LOP += leave.LOP;
         cl.closingBalance -= leave.numberOfDays;
+        if(leave.numberOfDays === 1){
+          cl.available[leave.from.date.slice(3,5)] -= leave.numberOfDays
+        }
+        else if(leave.numberOfDays === 1.5){
+          if(leave.from.firstHalf && leave.from.secondHalf){
+            cl.available[leave.from.date.slice(3,5)] -= 1
+            cl.available[leave.to.date.slice(3,5)] -= 0.5
+          }
+          else{
+            cl.available[leave.from.date.slice(3,5)] -= 0.5
+            cl.available[leave.to.date.slice(3,5)] -= 1
+          }
+        }
+        else if(leave.numberOfDays === 2){
+          cl.available[leave.from.date.slice(3,5)] -= 1
+          cl.available[leave.to.date.slice(3,5)] -= 1
+        }
         await cl.save();
       } else if (leave.leaveType === "Casual Leave" && leave.role === "GVR") {
         console.log("CL");
@@ -421,6 +455,23 @@ const AcceptLeave = async (req, res) => {
         cl.availed += leave.numberOfDays;
         cl.LOP += leave.LOP;
         cl.closingBalance -= leave.numberOfDays;
+        if(leave.numberOfDays === 1){
+          cl.available[leave.from.date.slice(3,5)] -= leave.numberOfDays
+        }
+        else if(leave.numberOfDays === 1.5){
+          if(leave.from.firstHalf && leave.from.secondHalf){
+            cl.available[leave.from.date.slice(3,5)] -= 1
+            cl.available[leave.to.date.slice(3,5)] -= 0.5
+          }
+          else{
+            cl.available[leave.from.date.slice(3,5)] -= 0.5
+            cl.available[leave.to.date.slice(3,5)] -= 1
+          }
+        }
+        else if(leave.numberOfDays === 2){
+          cl.available[leave.from.date.slice(3,5)] -= 1
+          cl.available[leave.to.date.slice(3,5)] -= 1
+        }
         await cl.save();
       } else if (leave.leaveType === "Casual Leave" && leave.role === "GVR") {
         console.log("CL");
@@ -495,6 +546,23 @@ const Accept = async (req, res) => {
         cl.availed += leave.numberOfDays;
         cl.LOP += leave.LOP;
         cl.closingBalance -= leave.numberOfDays;
+        if(leave.numberOfDays === 1){
+          cl.available[leave.from.date.slice(3,5)] -= leave.numberOfDays
+        }
+        else if(leave.numberOfDays === 1.5){
+          if(leave.from.firstHalf && leave.from.secondHalf){
+            cl.available[leave.from.date.slice(3,5)] -= 1
+            cl.available[leave.to.date.slice(3,5)] -= 0.5
+          }
+          else{
+            cl.available[leave.from.date.slice(3,5)] -= 0.5
+            cl.available[leave.to.date.slice(3,5)] -= 1
+          }
+        }
+        else if(leave.numberOfDays === 2){
+          cl.available[leave.from.date.slice(3,5)] -= 1
+          cl.available[leave.to.date.slice(3,5)] -= 1
+        }
         await cl.save();
       } else if (leave.leaveType === "Casual Leave" && leave.role === "GVR") {
         console.log("CL");
@@ -728,7 +796,7 @@ const Deny = async (req, res) => {
 
 const checkLeave = async (req, res) => {
   try {
-    const { empId, role, LeaveType, from, numberOfDays } = req.body;
+    const { empId, role, LeaveType, from, to, numberOfDays } = req.body;
     console.log(from.date.slice(0, 2));
     const fromData = await LeaveModel.find({
       empId: empId,
@@ -772,11 +840,26 @@ const checkLeave = async (req, res) => {
     }
     
     if (role === "3P") {
-      const cl = await CasualLeave.findOne({ empId: empId });
-      if (1 - cl.availed >= numberOfDays) {
-        res.status(200).json({
-          message: "You can take leave",
-        });
+      console.log("3p")
+      if (LeaveType === "Casual Leave") {
+        const cl = await CasualLeave.findOne({ empId: empId });
+        const fromMonth = from.date.slice(3, 5)
+        const toMonth = to.date.slice(3, 5)
+        if(numberOfDays <= 1 && cl.available[fromMonth] >= numberOfDays){
+          res.status(200).json({
+            message: "You can take leave",
+          });
+        }
+        else if(numberOfDays <= 2 && from.date.slice(3,5) != to.date.slice(3,5) && (cl.available[fromMonth]+cl.available[toMonth]) >= numberOfDays){
+          res.status(200).json({
+            message: "You can take leave",
+          });
+        }
+        else{
+          res.status(203).json({
+            message: "Your leave limit exceeded please try applying leave in LOP",
+          });
+        }
       }
       else if (LeaveType === "LOP") {
         res.status(200).json({
