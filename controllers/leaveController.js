@@ -457,13 +457,14 @@ const AcceptRejected = async (req, res) => {
           await cl.save();
         }
         else{
-          const cl = await CasualLeave.findOne({ empId:leave. empId });
+          const cl = await CasualLeave.findOne({ empId:leave.empId });
+          const lop = leave.numberOfDays;
           cl.availed += 0;
           cl.LOP += leave.numberOfDays;
           cl.closingBalance -= 0;
           leave.leaveType = "LOP";
           leave.numberOfDays = 0;
-          leave.LOP = leave.numberOfDays;
+          leave.LOP = lop;
           await leave.save();
           await cl.save();
         }
@@ -475,12 +476,14 @@ const AcceptRejected = async (req, res) => {
           cl.closingBalance -= leave.numberOfDays;
           await cl.save();
         } else {
+          const cl = await CasualLeave.findOne({ empId:leave.empId });
+          const lop = leave.numberOfDays;
           cl.availed += 0;
           cl.LOP += leave.numberOfDays;
           cl.closingBalance -= 0;
           leave.leaveType = "LOP";
           leave.numberOfDays = 0;
-          leave.LOP = leave.numberOfDays;
+          leave.LOP = lop;
           await leave.save();
           await cl.save();
         }
@@ -493,13 +496,14 @@ const AcceptRejected = async (req, res) => {
           pl.carryForward -= leave.numberOfDays;
           await pl.save();
         } else {
-          const cl = await CasualLeave.findOne({ empId: leave.empId });
+          const cl = await CasualLeave.findOne({ empId:leave.empId });
+          const lop = leave.numberOfDays;
           cl.availed += 0;
           cl.LOP += leave.numberOfDays;
           cl.closingBalance -= 0;
           leave.leaveType = "LOP";
           leave.numberOfDays = 0;
-          leave.LOP = leave.numberOfDays;
+          leave.LOP = lop;
           await leave.save();
           await cl.save();
         }
@@ -511,13 +515,14 @@ const AcceptRejected = async (req, res) => {
           pl.closingBalance -= leave.numberOfDays;
           await pl.save();
         } else {
-          const cl = await CasualLeave.findOne({ empId: leave.empId });
+          const cl = await CasualLeave.findOne({ empId:leave.empId });
+          const lop = leave.numberOfDays;
           cl.availed += 0;
           cl.LOP += leave.numberOfDays;
           cl.closingBalance -= 0;
           leave.leaveType = "LOP";
           leave.numberOfDays = 0;
-          leave.LOP = leave.numberOfDays;
+          leave.LOP = lop;
           await leave.save();
           await cl.save();
         }
@@ -529,13 +534,14 @@ const AcceptRejected = async (req, res) => {
           adpt.closingBalance -= leave.numberOfDays;
           adpt.save();
         } else {
-          const cl = await CasualLeave.findOne({ empId: leave.empId });
+          const cl = await CasualLeave.findOne({ empId:leave.empId });
+          const lop = leave.numberOfDays;
           cl.availed += 0;
           cl.LOP += leave.numberOfDays;
           cl.closingBalance -= 0;
           leave.leaveType = "LOP";
           leave.numberOfDays = 0;
-          leave.LOP = leave.numberOfDays;
+          leave.LOP = lop;
           await leave.save();
           await cl.save();
         }
@@ -670,13 +676,14 @@ const AcceptLeave = async (req, res) => {
           await cl.save();
         }
         else{
-          const cl = await CasualLeave.findOne({ empId:leave. empId });
+          const cl = await CasualLeave.findOne({ empId:leave.empId });
+          const lop = leave.numberOfDays;
           cl.availed += 0;
           cl.LOP += leave.numberOfDays;
           cl.closingBalance -= 0;
           leave.leaveType = "LOP";
           leave.numberOfDays = 0;
-          leave.LOP = leave.numberOfDays;
+          leave.LOP = lop;
           await leave.save();
           await cl.save();
         }
@@ -688,12 +695,14 @@ const AcceptLeave = async (req, res) => {
           cl.closingBalance -= leave.numberOfDays;
           await cl.save();
         } else {
+          const cl = await CasualLeave.findOne({ empId:leave.empId });
+          const lop = leave.numberOfDays;
           cl.availed += 0;
           cl.LOP += leave.numberOfDays;
           cl.closingBalance -= 0;
           leave.leaveType = "LOP";
           leave.numberOfDays = 0;
-          leave.LOP = leave.numberOfDays;
+          leave.LOP = lop;
           await leave.save();
           await cl.save();
         }
@@ -706,13 +715,14 @@ const AcceptLeave = async (req, res) => {
           pl.carryForward -= leave.numberOfDays;
           await pl.save();
         } else {
-          const cl = await CasualLeave.findOne({ empId: leave.empId });
+          const cl = await CasualLeave.findOne({ empId:leave.empId });
+          const lop = leave.numberOfDays;
           cl.availed += 0;
           cl.LOP += leave.numberOfDays;
           cl.closingBalance -= 0;
           leave.leaveType = "LOP";
           leave.numberOfDays = 0;
-          leave.LOP = leave.numberOfDays;
+          leave.LOP = lop;
           await leave.save();
           await cl.save();
         }
@@ -724,13 +734,14 @@ const AcceptLeave = async (req, res) => {
           pl.closingBalance -= leave.numberOfDays;
           await pl.save();
         } else {
-          const cl = await CasualLeave.findOne({ empId: leave.empId });
+          const cl = await CasualLeave.findOne({ empId:leave.empId });
+          const lop = leave.numberOfDays;
           cl.availed += 0;
           cl.LOP += leave.numberOfDays;
           cl.closingBalance -= 0;
           leave.leaveType = "LOP";
           leave.numberOfDays = 0;
-          leave.LOP = leave.numberOfDays;
+          leave.LOP = lop;
           await leave.save();
           await cl.save();
         }
@@ -742,13 +753,14 @@ const AcceptLeave = async (req, res) => {
           adpt.closingBalance -= leave.numberOfDays;
           adpt.save();
         } else {
-          const cl = await CasualLeave.findOne({ empId: leave.empId });
+          const cl = await CasualLeave.findOne({ empId:leave.empId });
+          const lop = leave.numberOfDays;
           cl.availed += 0;
           cl.LOP += leave.numberOfDays;
           cl.closingBalance -= 0;
           leave.leaveType = "LOP";
           leave.numberOfDays = 0;
-          leave.LOP = leave.numberOfDays;
+          leave.LOP = lop;
           await leave.save();
           await cl.save();
         }
@@ -880,13 +892,14 @@ const Accept = async (req, res) => {
           await cl.save();
         }
         else{
-          const cl = await CasualLeave.findOne({ empId:leave. empId });
+          const cl = await CasualLeave.findOne({ empId:leave.empId });
+          const lop = leave.numberOfDays;
           cl.availed += 0;
           cl.LOP += leave.numberOfDays;
           cl.closingBalance -= 0;
           leave.leaveType = "LOP";
           leave.numberOfDays = 0;
-          leave.LOP = leave.numberOfDays;
+          leave.LOP = lop;
           await leave.save();
           await cl.save();
         }
@@ -898,12 +911,14 @@ const Accept = async (req, res) => {
           cl.closingBalance -= leave.numberOfDays;
           await cl.save();
         } else {
+          const cl = await CasualLeave.findOne({ empId:leave.empId });
+          const lop = leave.numberOfDays;
           cl.availed += 0;
           cl.LOP += leave.numberOfDays;
           cl.closingBalance -= 0;
           leave.leaveType = "LOP";
           leave.numberOfDays = 0;
-          leave.LOP = leave.numberOfDays;
+          leave.LOP = lop;
           await leave.save();
           await cl.save();
         }
@@ -916,13 +931,14 @@ const Accept = async (req, res) => {
           pl.carryForward -= leave.numberOfDays;
           await pl.save();
         } else {
-          const cl = await CasualLeave.findOne({ empId: leave.empId });
+          const cl = await CasualLeave.findOne({ empId:leave.empId });
+          const lop = leave.numberOfDays;
           cl.availed += 0;
           cl.LOP += leave.numberOfDays;
           cl.closingBalance -= 0;
           leave.leaveType = "LOP";
           leave.numberOfDays = 0;
-          leave.LOP = leave.numberOfDays;
+          leave.LOP = lop;
           await leave.save();
           await cl.save();
         }
@@ -934,13 +950,14 @@ const Accept = async (req, res) => {
           pl.closingBalance -= leave.numberOfDays;
           await pl.save();
         } else {
-          const cl = await CasualLeave.findOne({ empId: leave.empId });
+          const cl = await CasualLeave.findOne({ empId:leave.empId });
+          const lop = leave.numberOfDays;
           cl.availed += 0;
           cl.LOP += leave.numberOfDays;
           cl.closingBalance -= 0;
           leave.leaveType = "LOP";
           leave.numberOfDays = 0;
-          leave.LOP = leave.numberOfDays;
+          leave.LOP = lop;
           await leave.save();
           await cl.save();
         }
@@ -952,13 +969,14 @@ const Accept = async (req, res) => {
           adpt.closingBalance -= leave.numberOfDays;
           adpt.save();
         } else {
-          const cl = await CasualLeave.findOne({ empId: leave.empId });
+          const cl = await CasualLeave.findOne({ empId:leave.empId });
+          const lop = leave.numberOfDays;
           cl.availed += 0;
           cl.LOP += leave.numberOfDays;
           cl.closingBalance -= 0;
           leave.leaveType = "LOP";
           leave.numberOfDays = 0;
-          leave.LOP = leave.numberOfDays;
+          leave.LOP = lop;
           await leave.save();
           await cl.save();
         }
