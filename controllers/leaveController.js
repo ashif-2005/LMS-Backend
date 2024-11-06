@@ -371,71 +371,164 @@ const AcceptRejected = async (req, res) => {
       res.status(202).json({ message: "Already Withdrawn" });
     } else {
       if (leave.leaveType === "Casual Leave" && leave.role === "3P") {
-        console.log("CL");
         const cl = await CasualLeave.findOne({ empId: leave.empId });
-        cl.availed += leave.numberOfDays;
-        cl.LOP += leave.LOP;
-        cl.closingBalance -= leave.numberOfDays;
-        if(leave.numberOfDays === 1){
-          const data = cl.available[leave.from.date.slice(3,5)] - leave.numberOfDays
-          await CasualLeave.updateOne(
-            { empId: leave.empId }, // filter to find the specific document
-            { $set: { [`available.${leave.from.date.slice(3,5)}`]: data } } // dynamically set "available.key" to 0
-          );
-        }
-        else if(leave.numberOfDays === 1.5){
-          if(leave.from.firstHalf && leave.from.secondHalf){
+        const fromMonth = leave.from.date.slice(3, 5)
+        const toMonth = leave.to.date.slice(3, 5)
+        if(leave.numberOfDays <= 1 && cl.available[fromMonth] >= leave.numberOfDays){
+          cl.availed += leave.numberOfDays;
+          cl.LOP += leave.LOP;
+          cl.closingBalance -= leave.numberOfDays;
+          console.log("sample")
+          if(leave.numberOfDays === 1){
+            console.log(cl.available[leave.from.date.slice(3,5)])
+            const data = cl.available[leave.from.date.slice(3,5)] - leave.numberOfDays
+            await CasualLeave.updateOne(
+              { empId: leave.empId }, // filter to find the specific document
+              { $set: { [`available.${leave.from.date.slice(3,5)}`]: data } } // dynamically set "available.key" to 0
+            );
+          }
+          else if(leave.numberOfDays === 1.5){
+            if(leave.from.firstHalf && leave.from.secondHalf){
+              const data1 = cl.available[leave.from.date.slice(3,5)] - 1
+              const data2 = cl.available[leave.to.date.slice(3,5)] - 0.5
+              await CasualLeave.updateOne(
+                { empId: leave.empId }, // filter to find the specific document
+                { $set: { [`available.${leave.from.date.slice(3,5)}`]: data1, [`available.${leave.to.date.slice(3,5)}`]: data2 } } // dynamically set "available.key" to 0
+              );
+            }
+            else{
+              const data1 = cl.available[leave.from.date.slice(3,5)] - 0.5
+              const data2 = cl.available[leave.to.date.slice(3,5)] - 1
+              await CasualLeave.updateOne(
+                { empId: leave.empId }, // filter to find the specific document
+                { $set: { [`available.${leave.from.date.slice(3,5)}`]: data1, [`available.${leave.to.date.slice(3,5)}`]: data2 } } // dynamically set "available.key" to 0
+              );
+            }
+          }
+          else if(leave.numberOfDays === 2){
             const data1 = cl.available[leave.from.date.slice(3,5)] - 1
-            const date2 = cl.available[leave.to.date.slice(3,5)] - 0.5
+            const data2 = cl.available[leave.to.date.slice(3,5)] - 1
             await CasualLeave.updateOne(
               { empId: leave.empId }, // filter to find the specific document
               { $set: { [`available.${leave.from.date.slice(3,5)}`]: data1, [`available.${leave.to.date.slice(3,5)}`]: data2 } } // dynamically set "available.key" to 0
             );
           }
-          else{
-            const dat1 = cl.available[leave.from.date.slice(3,5)] - 0.5
-            const date2 = cl.available[leave.to.date.slice(3,5)] - 1
+          await cl.save();
+        }
+        else if(leave.numberOfDays <= 2 && leave.from.date.slice(3,5) != leave.to.date.slice(3,5) && (cl.available[fromMonth]+cl.available[toMonth]) >= leave.numberOfDays){
+          cl.availed += leave.numberOfDays;
+          cl.LOP += leave.LOP;
+          cl.closingBalance -= leave.numberOfDays;
+          console.log("sample")
+          if(leave.numberOfDays === 1){
+            console.log(cl.available[leave.from.date.slice(3,5)])
+            const data = cl.available[leave.from.date.slice(3,5)] - leave.numberOfDays
             await CasualLeave.updateOne(
               { empId: leave.empId }, // filter to find the specific document
-              { $set: { [`available.${leave.from.date.slice(3,5)}`]: dat1, [`available.${leave.to.date.slice(3,5)}`]: date2 } } // dynamically set "available.key" to 0
+              { $set: { [`available.${leave.from.date.slice(3,5)}`]: data } } // dynamically set "available.key" to 0
             );
           }
+          else if(leave.numberOfDays === 1.5){
+            if(leave.from.firstHalf && leave.from.secondHalf){
+              const data1 = cl.available[leave.from.date.slice(3,5)] - 1
+              const data2 = cl.available[leave.to.date.slice(3,5)] - 0.5
+              await CasualLeave.updateOne(
+                { empId: leave.empId }, // filter to find the specific document
+                { $set: { [`available.${leave.from.date.slice(3,5)}`]: data1, [`available.${leave.to.date.slice(3,5)}`]: data2 } } // dynamically set "available.key" to 0
+              );
+            }
+            else{
+              const data1 = cl.available[leave.from.date.slice(3,5)] - 0.5
+              const data2 = cl.available[leave.to.date.slice(3,5)] - 1
+              await CasualLeave.updateOne(
+                { empId: leave.empId }, // filter to find the specific document
+                { $set: { [`available.${leave.from.date.slice(3,5)}`]: data1, [`available.${leave.to.date.slice(3,5)}`]: data2 } } // dynamically set "available.key" to 0
+              );
+            }
+          }
+          else if(leave.numberOfDays === 2){
+            const data1 = cl.available[leave.from.date.slice(3,5)] - 1
+            const data2 = cl.available[leave.to.date.slice(3,5)] - 1
+            await CasualLeave.updateOne(
+              { empId: leave.empId }, // filter to find the specific document
+              { $set: { [`available.${leave.from.date.slice(3,5)}`]: data1, [`available.${leave.to.date.slice(3,5)}`]: data2 } } // dynamically set "available.key" to 0
+            );
+          }
+          await cl.save();
         }
-        else if(leave.numberOfDays === 2){
-          const data1 = cl.available[leave.from.date.slice(3,5)] - 1
-          const data2 = cl.available[leave.to.date.slice(3,5)] - 1
-          await CasualLeave.updateOne(
-            { empId: leave.empId }, // filter to find the specific document
-            { $set: { [`available.${leave.from.date.slice(3,5)}`]: data1, [`available.${leave.to.date.slice(3,5)}`]: data2 } } // dynamically set "available.key" to 0
-          );
+        else{
+          const cl = await CasualLeave.findOne({ empId: empId });
+          cl.availed += 0;
+          cl.LOP += leave.numberOfDays;
+          cl.closingBalance -= 0;
+          leave.leaveType = "LOP";
+          await leave.save();
+          await cl.save();
         }
-        await cl.save();
       } else if (leave.leaveType === "Casual Leave" && leave.role === "GVR") {
-        console.log("CL");
         const cl = await CasualLeave.findOne({ empId: leave.empId });
-        cl.availed += leave.numberOfDays;
-        cl.LOP += leave.LOP;
-        cl.closingBalance -= leave.numberOfDays;
-        await cl.save();
+        if (cl.closingBalance >= leave.numberOfDays) {
+          cl.availed += leave.numberOfDays;
+          cl.LOP += leave.LOP;
+          cl.closingBalance -= leave.numberOfDays;
+          await cl.save();
+        } else {
+          cl.availed += 0;
+          cl.LOP += leave.numberOfDays;
+          cl.closingBalance -= 0;
+          leave.leaveType = "LOP";
+          await leave.save();
+          await cl.save();
+        }
       } else if (leave.leaveType === "Privelage Leave") {
         const pl = await PrivelageLeave.findOne({ empId: leave.empId });
-        pl.availed += leave.numberOfDays;
-        pl.LOP += leave.LOP;
-        pl.closingBalance -= leave.numberOfDays;
-        pl.carryForward -= leave.numberOfDays;
-        await pl.save();
+        if (pl.closingBalance >= leave.numberOfDays) {
+          pl.availed += leave.numberOfDays;
+          pl.LOP += leave.LOP;
+          pl.closingBalance -= leave.numberOfDays;
+          pl.carryForward -= leave.numberOfDays;
+          await pl.save();
+        } else {
+          const cl = await CasualLeave.findOne({ empId: leave.empId });
+          cl.availed += 0;
+          cl.LOP += leave.numberOfDays;
+          cl.closingBalance -= 0;
+          leave.leaveType = "LOP";
+          await leave.save();
+          await cl.save();
+        }
       } else if (leave.leaveType === "Paternity Leave") {
         const pl = await PaternityLeave.findOne({ empId: leave.empId });
-        pl.availed += leave.numberOfDays;
-        pl.LOP += leave.LOP;
-        pl.closingBalance -= leave.numberOfDays;
-        await pl.save();
+        if (pl.closingBalance >= leave.numberOfDays) {
+          pl.availed += leave.numberOfDays;
+          pl.LOP += leave.LOP;
+          pl.closingBalance -= leave.numberOfDays;
+          await pl.save();
+        } else {
+          const cl = await CasualLeave.findOne({ empId: empId });
+          cl.availed += 0;
+          cl.LOP += leave.numberOfDays;
+          cl.closingBalance -= 0;
+          leave.leaveType = "LOP";
+          await leave.save();
+          await cl.save();
+        }
       } else if (leave.leaveType === "Adoption Leave") {
-        const atpt = await AdoptionLeave.findById({ empId: leave.empId });
-        adpt.availed += leave.numberOfDays;
-        adpt.LOP += leave.LOP;
-        adpt.closingBalance -= leave.numberOfDays;
-        adpt.save();
+        const adpt = await AdoptionLeave.findById({ empId: leave.empId });
+        if (cl.closingBalance >= numberOfDays) {
+          adpt.availed += leave.numberOfDays;
+          adpt.LOP += leave.LOP;
+          adpt.closingBalance -= leave.numberOfDays;
+          adpt.save();
+        } else {
+          const cl = await CasualLeave.findOne({ empId: empId });
+          cl.availed += 0;
+          cl.LOP += leave.numberOfDays;
+          cl.closingBalance -= 0;
+          leave.leaveType = "LOP";
+          await leave.save();
+          await cl.save();
+        }
       } else {
         const cl = await CasualLeave.findOne({ empId: leave.empId });
         cl.availed += leave.numberOfDays;
@@ -443,7 +536,6 @@ const AcceptRejected = async (req, res) => {
         cl.closingBalance -= leave.numberOfDays;
         await cl.save();
       }
-
       leave.status = "Approved";
       await leave.save();
       const emp = await EmpModel.findOne({ empId: leave.empId });
@@ -482,73 +574,164 @@ const AcceptLeave = async (req, res) => {
       res.sendFile(filePath);
     } else {
       if (leave.leaveType === "Casual Leave" && leave.role === "3P") {
-        console.log("CL");
         const cl = await CasualLeave.findOne({ empId: leave.empId });
-        cl.availed += leave.numberOfDays;
-        cl.LOP += leave.LOP;
-        cl.closingBalance -= leave.numberOfDays;
-        console.log("sample")
-        if(leave.numberOfDays === 1){
-          console.log(cl.available[leave.from.date.slice(3,5)])
-          const data = cl.available[leave.from.date.slice(3,5)] - leave.numberOfDays
-          await CasualLeave.updateOne(
-            { empId: leave.empId }, // filter to find the specific document
-            { $set: { [`available.${leave.from.date.slice(3,5)}`]: data } } // dynamically set "available.key" to 0
-          );
-        }
-        else if(leave.numberOfDays === 1.5){
-          if(leave.from.firstHalf && leave.from.secondHalf){
-            const data1 = cl.available[leave.from.date.slice(3,5)] - 1
-            const data2 = cl.available[leave.to.date.slice(3,5)] - 0.5
+        const fromMonth = leave.from.date.slice(3, 5)
+        const toMonth = leave.to.date.slice(3, 5)
+        if(leave.numberOfDays <= 1 && cl.available[fromMonth] >= leave.numberOfDays){
+          cl.availed += leave.numberOfDays;
+          cl.LOP += leave.LOP;
+          cl.closingBalance -= leave.numberOfDays;
+          console.log("sample")
+          if(leave.numberOfDays === 1){
+            console.log(cl.available[leave.from.date.slice(3,5)])
+            const data = cl.available[leave.from.date.slice(3,5)] - leave.numberOfDays
             await CasualLeave.updateOne(
               { empId: leave.empId }, // filter to find the specific document
-              { $set: { [`available.${leave.from.date.slice(3,5)}`]: data1, [`available.${leave.to.date.slice(3,5)}`]: data2 } } // dynamically set "available.key" to 0
+              { $set: { [`available.${leave.from.date.slice(3,5)}`]: data } } // dynamically set "available.key" to 0
             );
           }
-          else{
-            const data1 = cl.available[leave.from.date.slice(3,5)] - 0.5
+          else if(leave.numberOfDays === 1.5){
+            if(leave.from.firstHalf && leave.from.secondHalf){
+              const data1 = cl.available[leave.from.date.slice(3,5)] - 1
+              const data2 = cl.available[leave.to.date.slice(3,5)] - 0.5
+              await CasualLeave.updateOne(
+                { empId: leave.empId }, // filter to find the specific document
+                { $set: { [`available.${leave.from.date.slice(3,5)}`]: data1, [`available.${leave.to.date.slice(3,5)}`]: data2 } } // dynamically set "available.key" to 0
+              );
+            }
+            else{
+              const data1 = cl.available[leave.from.date.slice(3,5)] - 0.5
+              const data2 = cl.available[leave.to.date.slice(3,5)] - 1
+              await CasualLeave.updateOne(
+                { empId: leave.empId }, // filter to find the specific document
+                { $set: { [`available.${leave.from.date.slice(3,5)}`]: data1, [`available.${leave.to.date.slice(3,5)}`]: data2 } } // dynamically set "available.key" to 0
+              );
+            }
+          }
+          else if(leave.numberOfDays === 2){
+            const data1 = cl.available[leave.from.date.slice(3,5)] - 1
             const data2 = cl.available[leave.to.date.slice(3,5)] - 1
             await CasualLeave.updateOne(
               { empId: leave.empId }, // filter to find the specific document
               { $set: { [`available.${leave.from.date.slice(3,5)}`]: data1, [`available.${leave.to.date.slice(3,5)}`]: data2 } } // dynamically set "available.key" to 0
             );
           }
+          await cl.save();
         }
-        else if(leave.numberOfDays === 2){
-          const data1 = cl.available[leave.from.date.slice(3,5)] - 1
-          const data2 = cl.available[leave.to.date.slice(3,5)] - 1
-          await CasualLeave.updateOne(
-            { empId: leave.empId }, // filter to find the specific document
-            { $set: { [`available.${leave.from.date.slice(3,5)}`]: data1, [`available.${leave.to.date.slice(3,5)}`]: data2 } } // dynamically set "available.key" to 0
-          );
+        else if(leave.numberOfDays <= 2 && leave.from.date.slice(3,5) != leave.to.date.slice(3,5) && (cl.available[fromMonth]+cl.available[toMonth]) >= leave.numberOfDays){
+          cl.availed += leave.numberOfDays;
+          cl.LOP += leave.LOP;
+          cl.closingBalance -= leave.numberOfDays;
+          console.log("sample")
+          if(leave.numberOfDays === 1){
+            console.log(cl.available[leave.from.date.slice(3,5)])
+            const data = cl.available[leave.from.date.slice(3,5)] - leave.numberOfDays
+            await CasualLeave.updateOne(
+              { empId: leave.empId }, // filter to find the specific document
+              { $set: { [`available.${leave.from.date.slice(3,5)}`]: data } } // dynamically set "available.key" to 0
+            );
+          }
+          else if(leave.numberOfDays === 1.5){
+            if(leave.from.firstHalf && leave.from.secondHalf){
+              const data1 = cl.available[leave.from.date.slice(3,5)] - 1
+              const data2 = cl.available[leave.to.date.slice(3,5)] - 0.5
+              await CasualLeave.updateOne(
+                { empId: leave.empId }, // filter to find the specific document
+                { $set: { [`available.${leave.from.date.slice(3,5)}`]: data1, [`available.${leave.to.date.slice(3,5)}`]: data2 } } // dynamically set "available.key" to 0
+              );
+            }
+            else{
+              const data1 = cl.available[leave.from.date.slice(3,5)] - 0.5
+              const data2 = cl.available[leave.to.date.slice(3,5)] - 1
+              await CasualLeave.updateOne(
+                { empId: leave.empId }, // filter to find the specific document
+                { $set: { [`available.${leave.from.date.slice(3,5)}`]: data1, [`available.${leave.to.date.slice(3,5)}`]: data2 } } // dynamically set "available.key" to 0
+              );
+            }
+          }
+          else if(leave.numberOfDays === 2){
+            const data1 = cl.available[leave.from.date.slice(3,5)] - 1
+            const data2 = cl.available[leave.to.date.slice(3,5)] - 1
+            await CasualLeave.updateOne(
+              { empId: leave.empId }, // filter to find the specific document
+              { $set: { [`available.${leave.from.date.slice(3,5)}`]: data1, [`available.${leave.to.date.slice(3,5)}`]: data2 } } // dynamically set "available.key" to 0
+            );
+          }
+          await cl.save();
         }
-        await cl.save();
+        else{
+          const cl = await CasualLeave.findOne({ empId: empId });
+          cl.availed += 0;
+          cl.LOP += leave.numberOfDays;
+          cl.closingBalance -= 0;
+          leave.leaveType = "LOP";
+          await leave.save();
+          await cl.save();
+        }
       } else if (leave.leaveType === "Casual Leave" && leave.role === "GVR") {
-        console.log("CL");
         const cl = await CasualLeave.findOne({ empId: leave.empId });
-        cl.availed += leave.numberOfDays;
-        cl.LOP += leave.LOP;
-        cl.closingBalance -= leave.numberOfDays;
-        await cl.save();
+        if (cl.closingBalance >= leave.numberOfDays) {
+          cl.availed += leave.numberOfDays;
+          cl.LOP += leave.LOP;
+          cl.closingBalance -= leave.numberOfDays;
+          await cl.save();
+        } else {
+          cl.availed += 0;
+          cl.LOP += leave.numberOfDays;
+          cl.closingBalance -= 0;
+          leave.leaveType = "LOP";
+          await leave.save();
+          await cl.save();
+        }
       } else if (leave.leaveType === "Privelage Leave") {
         const pl = await PrivelageLeave.findOne({ empId: leave.empId });
-        pl.availed += leave.numberOfDays;
-        pl.LOP += leave.LOP;
-        pl.closingBalance -= leave.numberOfDays;
-        pl.carryForward -= leave.numberOfDays;
-        await pl.save();
+        if (pl.closingBalance >= leave.numberOfDays) {
+          pl.availed += leave.numberOfDays;
+          pl.LOP += leave.LOP;
+          pl.closingBalance -= leave.numberOfDays;
+          pl.carryForward -= leave.numberOfDays;
+          await pl.save();
+        } else {
+          const cl = await CasualLeave.findOne({ empId: leave.empId });
+          cl.availed += 0;
+          cl.LOP += leave.numberOfDays;
+          cl.closingBalance -= 0;
+          leave.leaveType = "LOP";
+          await leave.save();
+          await cl.save();
+        }
       } else if (leave.leaveType === "Paternity Leave") {
         const pl = await PaternityLeave.findOne({ empId: leave.empId });
-        pl.availed += leave.numberOfDays;
-        pl.LOP += leave.LOP;
-        pl.closingBalance -= leave.numberOfDays;
-        await pl.save();
+        if (pl.closingBalance >= leave.numberOfDays) {
+          pl.availed += leave.numberOfDays;
+          pl.LOP += leave.LOP;
+          pl.closingBalance -= leave.numberOfDays;
+          await pl.save();
+        } else {
+          const cl = await CasualLeave.findOne({ empId: empId });
+          cl.availed += 0;
+          cl.LOP += leave.numberOfDays;
+          cl.closingBalance -= 0;
+          leave.leaveType = "LOP";
+          await leave.save();
+          await cl.save();
+        }
       } else if (leave.leaveType === "Adoption Leave") {
-        const atpt = await AdoptionLeave.findById({ empId: leave.empId });
-        adpt.availed += leave.numberOfDays;
-        adpt.LOP += leave.LOP;
-        adpt.closingBalance -= leave.numberOfDays;
-        adpt.save();
+        const adpt = await AdoptionLeave.findById({ empId: leave.empId });
+        if (cl.closingBalance >= numberOfDays) {
+          adpt.availed += leave.numberOfDays;
+          adpt.LOP += leave.LOP;
+          adpt.closingBalance -= leave.numberOfDays;
+          adpt.save();
+        } else {
+          const cl = await CasualLeave.findOne({ empId: empId });
+          cl.availed += 0;
+          cl.LOP += leave.numberOfDays;
+          cl.closingBalance -= 0;
+          leave.leaveType = "LOP";
+          await leave.save();
+          await cl.save();
+        }
       } else {
         const cl = await CasualLeave.findOne({ empId: leave.empId });
         cl.availed += leave.numberOfDays;
@@ -591,71 +774,164 @@ const Accept = async (req, res) => {
       res.status(202).json({ message: "Already Withdrawn" });
     } else {
       if (leave.leaveType === "Casual Leave" && leave.role === "3P") {
-        console.log("CL");
         const cl = await CasualLeave.findOne({ empId: leave.empId });
-        cl.availed += leave.numberOfDays;
-        cl.LOP += leave.LOP;
-        cl.closingBalance -= leave.numberOfDays;
-        if(leave.numberOfDays === 1){
-          const data = cl.available[leave.from.date.slice(3,5)] - leave.numberOfDays
-          await CasualLeave.updateOne(
-            { empId: leave.empId }, // filter to find the specific document
-            { $set: { [`available.${leave.from.date.slice(3,5)}`]: data } } // dynamically set "available.key" to 0
-          );
-        }
-        else if(leave.numberOfDays === 1.5){
-          if(leave.from.firstHalf && leave.from.secondHalf){
-            const data1 = cl.available[leave.from.date.slice(3,5)] - 1
-            const data2 = cl.available[leave.to.date.slice(3,5)] - 0.5
+        const fromMonth = leave.from.date.slice(3, 5)
+        const toMonth = leave.to.date.slice(3, 5)
+        if(leave.numberOfDays <= 1 && cl.available[fromMonth] >= leave.numberOfDays){
+          cl.availed += leave.numberOfDays;
+          cl.LOP += leave.LOP;
+          cl.closingBalance -= leave.numberOfDays;
+          console.log("sample")
+          if(leave.numberOfDays === 1){
+            console.log(cl.available[leave.from.date.slice(3,5)])
+            const data = cl.available[leave.from.date.slice(3,5)] - leave.numberOfDays
             await CasualLeave.updateOne(
               { empId: leave.empId }, // filter to find the specific document
-              { $set: { [`available.${leave.from.date.slice(3,5)}`]: data1, [`available.${leave.to.date.slice(3,5)}`]: data2 } } // dynamically set "available.key" to 0
+              { $set: { [`available.${leave.from.date.slice(3,5)}`]: data } } // dynamically set "available.key" to 0
             );
           }
-          else{
-            const data1 = cl.available[leave.from.date.slice(3,5)] - 0.5
+          else if(leave.numberOfDays === 1.5){
+            if(leave.from.firstHalf && leave.from.secondHalf){
+              const data1 = cl.available[leave.from.date.slice(3,5)] - 1
+              const data2 = cl.available[leave.to.date.slice(3,5)] - 0.5
+              await CasualLeave.updateOne(
+                { empId: leave.empId }, // filter to find the specific document
+                { $set: { [`available.${leave.from.date.slice(3,5)}`]: data1, [`available.${leave.to.date.slice(3,5)}`]: data2 } } // dynamically set "available.key" to 0
+              );
+            }
+            else{
+              const data1 = cl.available[leave.from.date.slice(3,5)] - 0.5
+              const data2 = cl.available[leave.to.date.slice(3,5)] - 1
+              await CasualLeave.updateOne(
+                { empId: leave.empId }, // filter to find the specific document
+                { $set: { [`available.${leave.from.date.slice(3,5)}`]: data1, [`available.${leave.to.date.slice(3,5)}`]: data2 } } // dynamically set "available.key" to 0
+              );
+            }
+          }
+          else if(leave.numberOfDays === 2){
+            const data1 = cl.available[leave.from.date.slice(3,5)] - 1
             const data2 = cl.available[leave.to.date.slice(3,5)] - 1
             await CasualLeave.updateOne(
               { empId: leave.empId }, // filter to find the specific document
               { $set: { [`available.${leave.from.date.slice(3,5)}`]: data1, [`available.${leave.to.date.slice(3,5)}`]: data2 } } // dynamically set "available.key" to 0
             );
           }
+          await cl.save();
         }
-        else if(leave.numberOfDays === 2){
-          const data1 = cl.available[leave.from.date.slice(3,5)] - 1
-          const data2 = cl.available[leave.to.date.slice(3,5)] - 1
-          await CasualLeave.updateOne(
-            { empId: leave.empId }, // filter to find the specific document
-            { $set: { [`available.${leave.from.date.slice(3,5)}`]: data1, [`available.${leave.to.date.slice(3,5)}`]: data2 } } // dynamically set "available.key" to 0
-          );
+        else if(leave.numberOfDays <= 2 && leave.from.date.slice(3,5) != leave.to.date.slice(3,5) && (cl.available[fromMonth]+cl.available[toMonth]) >= leave.numberOfDays){
+          cl.availed += leave.numberOfDays;
+          cl.LOP += leave.LOP;
+          cl.closingBalance -= leave.numberOfDays;
+          console.log("sample")
+          if(leave.numberOfDays === 1){
+            console.log(cl.available[leave.from.date.slice(3,5)])
+            const data = cl.available[leave.from.date.slice(3,5)] - leave.numberOfDays
+            await CasualLeave.updateOne(
+              { empId: leave.empId }, // filter to find the specific document
+              { $set: { [`available.${leave.from.date.slice(3,5)}`]: data } } // dynamically set "available.key" to 0
+            );
+          }
+          else if(leave.numberOfDays === 1.5){
+            if(leave.from.firstHalf && leave.from.secondHalf){
+              const data1 = cl.available[leave.from.date.slice(3,5)] - 1
+              const data2 = cl.available[leave.to.date.slice(3,5)] - 0.5
+              await CasualLeave.updateOne(
+                { empId: leave.empId }, // filter to find the specific document
+                { $set: { [`available.${leave.from.date.slice(3,5)}`]: data1, [`available.${leave.to.date.slice(3,5)}`]: data2 } } // dynamically set "available.key" to 0
+              );
+            }
+            else{
+              const data1 = cl.available[leave.from.date.slice(3,5)] - 0.5
+              const data2 = cl.available[leave.to.date.slice(3,5)] - 1
+              await CasualLeave.updateOne(
+                { empId: leave.empId }, // filter to find the specific document
+                { $set: { [`available.${leave.from.date.slice(3,5)}`]: data1, [`available.${leave.to.date.slice(3,5)}`]: data2 } } // dynamically set "available.key" to 0
+              );
+            }
+          }
+          else if(leave.numberOfDays === 2){
+            const data1 = cl.available[leave.from.date.slice(3,5)] - 1
+            const data2 = cl.available[leave.to.date.slice(3,5)] - 1
+            await CasualLeave.updateOne(
+              { empId: leave.empId }, // filter to find the specific document
+              { $set: { [`available.${leave.from.date.slice(3,5)}`]: data1, [`available.${leave.to.date.slice(3,5)}`]: data2 } } // dynamically set "available.key" to 0
+            );
+          }
+          await cl.save();
         }
-        await cl.save();
+        else{
+          const cl = await CasualLeave.findOne({ empId: empId });
+          cl.availed += 0;
+          cl.LOP += leave.numberOfDays;
+          cl.closingBalance -= 0;
+          leave.leaveType = "LOP";
+          await leave.save();
+          await cl.save();
+        }
       } else if (leave.leaveType === "Casual Leave" && leave.role === "GVR") {
-        console.log("CL");
         const cl = await CasualLeave.findOne({ empId: leave.empId });
-        cl.availed += leave.numberOfDays;
-        cl.LOP += leave.LOP;
-        cl.closingBalance -= leave.numberOfDays;
-        await cl.save();
+        if (cl.closingBalance >= leave.numberOfDays) {
+          cl.availed += leave.numberOfDays;
+          cl.LOP += leave.LOP;
+          cl.closingBalance -= leave.numberOfDays;
+          await cl.save();
+        } else {
+          cl.availed += 0;
+          cl.LOP += leave.numberOfDays;
+          cl.closingBalance -= 0;
+          leave.leaveType = "LOP";
+          await leave.save();
+          await cl.save();
+        }
       } else if (leave.leaveType === "Privelage Leave") {
         const pl = await PrivelageLeave.findOne({ empId: leave.empId });
-        pl.availed += leave.numberOfDays;
-        pl.LOP += leave.LOP;
-        pl.closingBalance -= leave.numberOfDays;
-        pl.carryForward -= leave.numberOfDays;
-        await pl.save();
+        if (pl.closingBalance >= leave.numberOfDays) {
+          pl.availed += leave.numberOfDays;
+          pl.LOP += leave.LOP;
+          pl.closingBalance -= leave.numberOfDays;
+          pl.carryForward -= leave.numberOfDays;
+          await pl.save();
+        } else {
+          const cl = await CasualLeave.findOne({ empId: leave.empId });
+          cl.availed += 0;
+          cl.LOP += leave.numberOfDays;
+          cl.closingBalance -= 0;
+          leave.leaveType = "LOP";
+          await leave.save();
+          await cl.save();
+        }
       } else if (leave.leaveType === "Paternity Leave") {
         const pl = await PaternityLeave.findOne({ empId: leave.empId });
-        pl.availed += leave.numberOfDays;
-        pl.LOP += leave.LOP;
-        pl.closingBalance -= leave.numberOfDays;
-        await pl.save();
+        if (pl.closingBalance >= leave.numberOfDays) {
+          pl.availed += leave.numberOfDays;
+          pl.LOP += leave.LOP;
+          pl.closingBalance -= leave.numberOfDays;
+          await pl.save();
+        } else {
+          const cl = await CasualLeave.findOne({ empId: empId });
+          cl.availed += 0;
+          cl.LOP += leave.numberOfDays;
+          cl.closingBalance -= 0;
+          leave.leaveType = "LOP";
+          await leave.save();
+          await cl.save();
+        }
       } else if (leave.leaveType === "Adoption Leave") {
-        const atpt = await AdoptionLeave.findById({ empId: leave.empId });
-        adpt.availed += leave.numberOfDays;
-        adpt.LOP += leave.LOP;
-        adpt.closingBalance -= leave.numberOfDays;
-        adpt.save();
+        const adpt = await AdoptionLeave.findById({ empId: leave.empId });
+        if (cl.closingBalance >= numberOfDays) {
+          adpt.availed += leave.numberOfDays;
+          adpt.LOP += leave.LOP;
+          adpt.closingBalance -= leave.numberOfDays;
+          adpt.save();
+        } else {
+          const cl = await CasualLeave.findOne({ empId: empId });
+          cl.availed += 0;
+          cl.LOP += leave.numberOfDays;
+          cl.closingBalance -= 0;
+          leave.leaveType = "LOP";
+          await leave.save();
+          await cl.save();
+        }
       } else {
         const cl = await CasualLeave.findOne({ empId: leave.empId });
         cl.availed += leave.numberOfDays;
@@ -894,11 +1170,26 @@ const checkLeave = async (req, res) => {
         .json({ mesasage: "Already leave had applied in the same day" });
     }
 
+    var list = [];
+    for (
+      let i = parseInt(from.date.slice(0, 2)) + 1;
+      i < parseInt(to.date.slice(0, 2));
+      i++
+    ) {
+      if (i < 10) {
+        list.push(0 + i.toString());
+      } else {
+        list.push(i.toString());
+      }
+    }
+
+    console.log(list)
+
     const data = await LeaveModel.find({
       empId: empId,
-      days: { $in: [from.date.slice(0, 2)] },
+      days: { $in: list },
     });
-    console.log(data);
+
     if (data.length) {
       return res
         .status(202)
@@ -940,7 +1231,6 @@ const checkLeave = async (req, res) => {
     } else {
       console.log(LeaveType);
       if (LeaveType === "Casual Leave") {
-        console.log("sample");
         const cl = await CasualLeave.findOne({ empId: empId });
         if (cl.closingBalance >= numberOfDays) {
           res.status(200).json({
