@@ -1190,21 +1190,25 @@ const checkLeave = async (req, res) => {
     console.log(from.date.slice(0, 2));
     const fromData = await LeaveModel.find({
       empId: empId,
+      $or: [ { status: 'Approved' }, { status: 'Pending' } ]
       "from.date": from.date,
       "from.firstHalf": true,
     });
     const toData = await LeaveModel.find({
       empId: empId,
+      $or: [ { status: 'Approved' }, { status: 'Pending' } ]
       "to.date": from.date,
       "to.firstHalf": true,
     });
     const From = await LeaveModel.find({
       empId: empId,
+      $or: [ { status: 'Approved' }, { status: 'Pending' } ]
       "from.date": from.date,
       "from.secondHalf": true,
     });
     const To = await LeaveModel.find({
       empId: empId,
+      $or: [ { status: 'Approved' }, { status: 'Pending' } ]
       "to.date": from.date,
       "to.secondHalf": true,
     });
@@ -1235,6 +1239,7 @@ const checkLeave = async (req, res) => {
 
     const data = await LeaveModel.find({
       empId: empId,
+      $or: [ { status: 'Approved' }, { status: 'Pending' } ]
       days: { $in: list },
     });
 
