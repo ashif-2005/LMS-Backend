@@ -34,23 +34,12 @@ const addAdmin = async (req, res) => {
       permissionAvailed,
     } = req.body;
 
-    // Check if employee already exists
-    const existingEmployee = await EmpModel.findOne({ empId });
-    if (existingEmployee) {
-      return res.status(400).json({ message: "Employee already exists" });
-    }
-
-    console.log("check");
-
-    count++;
     const userName =
       year.toString().substring(2, 4) +
       "GVRADMIN" +
       count.toString().padStart(3, "0");
     const password = "admin@123";
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    console.log(userName);
 
     const newEmployee = new EmpModel({
       empId,
@@ -109,10 +98,6 @@ const Register = async (req, res) => {
       permissionAvailed,
     } = req.body;
 
-    // Check if employee already exists
-    const existingEmployee = await EmpModel.findOne({ empId });
-    const existingPhone = await EmpModel.findOne({ empPhone });
-    const existingMail = await EmpModel.findOne({ empMail });
     const emp = await EmpModel.findOne({ empId: id });
     if (!emp) {
       return res.status(404).json({ message: "Employee not found" });
@@ -122,29 +107,33 @@ const Register = async (req, res) => {
         .status(403)
         .json({ message: "Only Admin can create new employee" });
     }
-    if (existingEmployee || existingPhone || existingMail) {
+    const employee = await EmpModel.find({
+      $or: [
+        { empId: obj.empId },
+        { empPhone: obj.empPhone },
+        { empMail: obj.empMail }
+      ]
+    });
+    if (employee) {
       return res
         .status(400)
         .json({ message: "Employee with this ID already exists" });
     }
 
     const empCount = await EmpModel.findOne().sort({ $natural: -1 }).limit(1);
-    console.log(empCount);
     let count = parseInt(empCount.userName.slice(-3));
-    console.log(count);
-    count++;
     const userName =
       year.toString().substring(2, 4) +
       vendor +
-      count.toString().padStart(3, "0");
-    console.log(userName);
-    const password = "user@123";
+      (++count).toString().padStart(3, "0");
 
+    const password = "user@123";
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const empManager = await EmpModel.findOne({ userName: managerId });
-
-    // Create new employee
+    if (!empManager) {
+      return res.status(402).json({ message: "Manager not found" });
+    }
     const newEmployee = new EmpModel({
       empId,
       userName,
@@ -169,72 +158,6 @@ const Register = async (req, res) => {
       permissionEligible,
       permissionAvailed,
     });
-
-    if (role === "GVR" || role === "3P") {
-      const data = await EmpModel.findOne({ userName: managerId });
-      if (!data) {
-        return res.status(402).json({ message: "Manager not found" });
-      } else {
-        console.log("Adding employee...");
-        await EmpModel.findByIdAndUpdate(data._id, {
-          $push: { employees: empPhone },
-        });
-        console.log("employee added to the manager");
-      }
-    }
-
-    if (isPaternity) {
-      const paternity = new PaternityLeave({
-        empId,
-        opBalance: 0,
-        credit: 5,
-        totalEligibility: 5,
-        closingBalance: 5,
-      });
-      await paternity.save();
-    }
-
-    if (isAdpt) {
-      const Adpt = new AdoptionLeave({
-        empId,
-        opBalance: 0,
-        credit: 42,
-        totalEligibility: 42,
-        closingBalance: 42,
-      });
-      await Adpt.save();
-    }
-
-    if (role === "3P") {
-      const cl = new CasualLeave({
-        empId,
-        opBalance: 0,
-        credit: 12,
-        totalEligibility: 12,
-        closingBalance: 12,
-      });
-      await cl.save();
-    } else if (role === "GVR") {
-      const cl = new CasualLeave({
-        empId,
-        opBalance: 0,
-        credit: 10,
-        totalEligibility: 10,
-        closingBalance: 10,
-      });
-
-      const pl = new PrivelageLeave({
-        empId,
-        opBalance: 0,
-        credit: 16,
-        totalEligibility: 16,
-        closingBalance: 16,
-        carryForward: 16,
-      });
-
-      await cl.save();
-      await pl.save();
-    }
 
     await newEmployee.save();
 
@@ -408,21 +331,18 @@ const deleteEmp = async (req, res) => {
     if (!admin) {
       return res.status(404).json({ message: "Employee not found" });
     } else if (admin.role === "Admin") {
-      const emp = await EmpModel.findOne({ empId })
-      if(!emp){
+      const emp = await EmpModel.findOne({ empId });
+      if (!emp) {
         return res.status(404).json({ message: "Employee not found" });
-      }
-      else{
-        if(emp.role === "3P"){
+      } else {
+        if (emp.role === "3P") {
           await CasualLeave.findOneAndDelete({ empId });
-        }
-        else if(emp.role === "GVR"){
+        } else if (emp.role === "GVR") {
           await CasualLeave.findOneAndDelete({ empId });
           await PrivelageLeave.findOneAndDelete({ empId });
-          if(emp.isAdpt){
+          if (emp.isAdpt) {
             await AdoptionLeave.findOneAndDelete({ empId });
-          }
-          else if(emp.isPaternity){
+          } else if (emp.isPaternity) {
             await PaternityLeave.findOneAndDelete({ empId });
           }
         }
@@ -437,127 +357,65 @@ const deleteEmp = async (req, res) => {
   }
 };
 
+const getManager = async (user) => {
+  try {
+    const empManager = await EmpModel.findOne({ userName: user.managerId });
+    if (!empManager) {
+      return res.status(402).json({ message: "Manager not found" });
+    }
+    return empManager;
+  } catch (error) {
+    res.status(500).json({ message: "Server Error", error: err });
+  }
+};
+
 const importEmp = async (req, res) => {
   try {
     const { id, emp } = req.body;
-    console.log(id)
     const admin = await EmpModel.findOne({ empId: id });
     if (!admin) {
       return res.status(404).json({ message: "Employee not found" });
     } else if (admin.role === "Admin") {
-      console.log("admin")
-      for (const obj of emp) {
-        const existingEmployee = await EmpModel.findOne({ empId: obj.empId });
-        const existingPhone = await EmpModel.findOne({ empPhone: obj.empPhone });
-        const existingMail = await EmpModel.findOne({ empMail: obj.empMail });
+      const empCount = await EmpModel.findOne().sort({ $natural: -1 }).limit(1);
+      let count = empCount ? parseInt(empCount.userName.slice(-3)) : 0;
 
-        if (existingEmployee || existingPhone || existingMail) {
-          return res
-            .status(400)
-            .json({ message: "Employee with this ID, phone, or email already exists" });
-        }
+      const password = "user@123";
+      const hashedPassword = await bcrypt.hash(password, 10);
 
-        const empCount = await EmpModel.findOne().sort({ $natural: -1 }).limit(1);
-        let count = empCount ? parseInt(empCount.userName.slice(-3)) : 0;
-        count++;
-        const userName =
-          new Date().getFullYear().toString().substring(2, 4) +
-          obj.vendor +
-          count.toString().padStart(3, "0");
-        const password = "user@123";
-
-
-
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        const empManager = await EmpModel.findOne({ userName: obj.managerId });
-        if (!empManager) {
-          return res.status(402).json({ message: "Manager not found" });
-        }
-
-        const newEmployee = new EmpModel({
-          empId: obj.empId,
-          userName,
-          password: hashedPassword,
-          empName: obj.empName,
-          empMail: obj.empMail,
-          empPhone: "+91" + obj.empPhone,
-          role: obj.role,
-          vendor: obj.vendor,
-          gender: obj.gender,
-          managerId: obj.managerId,
-          manager: empManager.empName,
-          reportingManager: empManager.empMail,
-          dateOfJoining: obj.dateOfJoining,
-          function: obj.function,
-          department: obj.department,
-          level: obj.level,
-          location: obj.location,
-          unit: obj.unit,
-          isPaternity: obj.isPaternity,
-          isAdpt: obj.isAdpt,
-        });
-
-        if (obj.role === "GVR" || obj.role === "3P") {
-          await EmpModel.findByIdAndUpdate(empManager._id, {
-            $push: { employees: obj.empPhone },
+      const usersWithIds = await Promise.all(
+        emp.map(async (user, index) => {
+          const existingEmployee = await EmpModel.findOne({
+            $or: [
+              { empId: user.empId },
+              { empPhone: user.empPhone },
+              { empMail: user.empMail },
+            ],
           });
-        }
 
-        if (obj.isPaternity) {
-          const paternity = new PaternityLeave({
-            empId: obj.empId,
-            opBalance: 0,
-            credit: 5,
-            totalEligibility: 5,
-            closingBalance: 5,
-          });
-          await paternity.save();
-        }
+          if (existingEmployee) return null;
 
-        if (obj.isAdpt) {
-          const Adpt = new AdoptionLeave({
-            empId: obj.empId,
-            opBalance: 0,
-            credit: 42,
-            totalEligibility: 42,
-            closingBalance: 42,
-          });
-          await Adpt.save();
-        }
+          return {
+            ...user,
+            userName:
+              today.getFullYear().toString().substring(2, 4) +
+              user.vendor +
+              (++count).toString().padStart(3, "0"),
+            password: hashedPassword,
+            empPhone: "+91" + user.empPhone,
+            manager: await getManager(user).then(
+              (employee) => employee.empName
+            ),
+            reportingManager: await getManager(user).then(
+              (employee) => employee.empMail
+            ),
+          };
+        })
+      );
 
-        if (obj.role === "3P") {
-          const cl = new CasualLeave({
-            empId: obj.empId,
-            opBalance: 0,
-            credit: 12,
-            totalEligibility: 12,
-            closingBalance: 12,
-          });
-          await cl.save();
-        } else if (obj.role === "GVR") {
-          const cl = new CasualLeave({
-            empId: obj.empId,
-            opBalance: 0,
-            credit: 10,
-            totalEligibility: 10,
-            closingBalance: 10,
-          });
-          const pl = new PrivelageLeave({
-            empId: obj.empId,
-            opBalance: 0,
-            credit: 16,
-            totalEligibility: 16,
-            closingBalance: 16,
-            carryForward: 16,
-          });
-          await cl.save();
-          await pl.save();
-        }
+      const filteredUsers = usersWithIds.filter((user) => user !== null);
 
-        await newEmployee.save();
-      }
-      res.status(201).json({ message: "Employee(s) registered successfully" });
+      await EmpModel.insertMany(filteredUsers);
+      res.status(201).json({ message: "Employees registered successfully" });
     } else {
       return res.status(400).json({ message: "Permission Denied" });
     }
@@ -566,6 +424,25 @@ const importEmp = async (req, res) => {
   }
 };
 
+const checkExistingPassword = async(req, res) => {
+  try {
+    const { userName, password } = req.body;
+
+    const employee = await EmpModel.findOne({ userName });
+    if (!employee) {
+      return res.status(404).json({ message: "Employee not found" });
+    }
+
+    const isMatch = await bcrypt.compare(password, employee.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    res.status(200).json({ message: "Old password verified"});
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+}
 
 const forgetPassword = async (req, res) => {
   try {
@@ -595,5 +472,6 @@ module.exports = {
   updateEmpDetails,
   deleteEmp,
   importEmp,
+  checkExistingPassword,
   forgetPassword,
 };

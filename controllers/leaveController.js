@@ -10,9 +10,9 @@ const { Message } = require("../utils/message");
 
 const today = new Date();
 
-const date = today.getDate();
+const date = String(today.getDate()).padStart(2, '0');
 
-const month = today.getMonth() + 1;
+const month = String(today.getMonth() + 1).padStart(2, '0');
 
 const year = today.getFullYear();
 
@@ -1378,10 +1378,16 @@ const cardData = async (req, res) => {
 const weakData = async (req, res) => {
   try {
     const { empId } = req.body;
+    console.log(`${year}/${month}/${date}`)
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const YYYY = sevenDaysAgo.getFullYear();
+    const MM = String(sevenDaysAgo.getMonth() + 1).padStart(2, '0');
+    const DD = String(sevenDaysAgo.getDate()).padStart(2, '0');
     const employee = await EmpModel.findOne({ empId });
     const leaves = await LeaveModel.find({
       today: {
-        $gte: `${year}/${month}/${date - 7}`,
+        $gte: `${YYYY}/${MM}/${DD}`,
         $lte: `${year}/${month}/${date}`,
       },
       manager: employee.userName,

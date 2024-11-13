@@ -12,6 +12,7 @@ const Email = require('./routes/mailRoute')
 const Circular = require('./routes/circularRoute')
 const Message = require('./routes/messageRoute')
 const OTP = require('./routes/otpRoute')
+const initChangeStreams = require('./config/changeStream');
 
 const app = express()
 app.use(express.json())
@@ -20,6 +21,8 @@ app.use(cors());
 app.use(express.urlencoded({ extended: true }));
    
 dotenv.config('./env')
+
+initChangeStreams();
 
 app.use('/emp',EmpRoute)
 app.use('/leave',LeaveRoute)
