@@ -426,9 +426,9 @@ const importEmp = async (req, res) => {
 
 const checkExistingPassword = async(req, res) => {
   try {
-    const { userName, password } = req.body;
+    const { empId, password } = req.body;
 
-    const employee = await EmpModel.findOne({ userName });
+    const employee = await EmpModel.findOne({ empId });
     if (!employee) {
       return res.status(404).json({ message: "Employee not found" });
     }
