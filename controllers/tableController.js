@@ -16,4 +16,4 @@ const getDetails = async(req, res) =>{
     }
 }
 
-module.exports = {getDetails};
+module.exports = {getDetails};36
