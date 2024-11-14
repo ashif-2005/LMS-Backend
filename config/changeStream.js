@@ -5,13 +5,13 @@ const { PaternityLeave } = require("../models/paternityLeaveSchema");
 const { AdoptionLeave } = require("../models/adoptionLeaveModel");
 
 const initChangeStreams = () => {
-  EmpModel.watch().on('change', async (change) => {
-    console.log('Change detected in User collection:', change);
+  EmpModel.watch().on("change", async (change) => {
+    console.log("Change detected in User collection:", change);
 
-    if (change.operationType === 'insert') {
+    if (change.operationType === "insert") {
       try {
         const newUser = change.fullDocument;
-        console.log(newUser.isPaternity)
+        console.log(newUser.isPaternity);
         if (newUser.isPaternity) {
           const paternity = new PaternityLeave({
             empId: newUser.empId,
@@ -22,7 +22,7 @@ const initChangeStreams = () => {
           });
           await paternity.save();
         }
-    
+
         if (newUser.isAdpt) {
           const Adpt = new AdoptionLeave({
             empId: newUser.empId,
@@ -33,7 +33,7 @@ const initChangeStreams = () => {
           });
           await Adpt.save();
         }
-    
+
         if (newUser.role === "3P") {
           const cl = new CasualLeave({
             empId: newUser.empId,
@@ -51,7 +51,7 @@ const initChangeStreams = () => {
             totalEligibility: 10,
             closingBalance: 10,
           });
-    
+
           const pl = new PrivelageLeave({
             empId: newUser.empId,
             opBalance: 0,
@@ -60,13 +60,13 @@ const initChangeStreams = () => {
             closingBalance: 16,
             carryForward: 16,
           });
-    
+
           await cl.save();
           await pl.save();
         }
-        console.log('Document saved');
+        console.log("Document saved");
       } catch (error) {
-        console.error('Error adding data');
+        console.error("Error adding data");
       }
     }
   });

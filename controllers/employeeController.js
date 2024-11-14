@@ -109,12 +109,12 @@ const Register = async (req, res) => {
     }
     const employee = await EmpModel.find({
       $or: [
-        { empId: obj.empId },
-        { empPhone: obj.empPhone },
-        { empMail: obj.empMail }
+        { empId: empId },
+        { empPhone: empPhone },
+        { empMail: empMail }
       ]
     });
-    if (employee) {
+    if (employee.length) {
       return res
         .status(400)
         .json({ message: "Employee with this ID already exists" });
@@ -334,21 +334,20 @@ const deleteEmp = async (req, res) => {
       const emp = await EmpModel.findOne({ empId });
       if (!emp) {
         return res.status(404).json({ message: "Employee not found" });
-      } else {
-        if (emp.role === "3P") {
-          await CasualLeave.findOneAndDelete({ empId });
-        } else if (emp.role === "GVR") {
-          await CasualLeave.findOneAndDelete({ empId });
-          await PrivelageLeave.findOneAndDelete({ empId });
-          if (emp.isAdpt) {
-            await AdoptionLeave.findOneAndDelete({ empId });
-          } else if (emp.isPaternity) {
-            await PaternityLeave.findOneAndDelete({ empId });
-          }
-        }
-        await EmpModel.findOneAndDelete({ empId });
-        res.status(200).json({ message: "Employee deleted successfully" });
       }
+      if (emp.role === "3P") {
+        await CasualLeave.findOneAndDelete({ empId });
+      } else if (emp.role === "GVR") {
+        await CasualLeave.findOneAndDelete({ empId });
+        await PrivelageLeave.findOneAndDelete({ empId });
+        if (emp.isAdpt) {
+          await AdoptionLeave.findOneAndDelete({ empId });
+        } else if (emp.isPaternity) {
+          await PaternityLeave.findOneAndDelete({ empId });
+        }
+      }
+      await EmpModel.findOneAndDelete({ empId });
+      res.status(200).json({ message: "Employee deleted successfully" });
     } else {
       return res.status(400).json({ message: "Permission Denied" });
     }
