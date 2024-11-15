@@ -342,7 +342,8 @@ const deleteEmp = async (req, res) => {
         await PrivelageLeave.findOneAndDelete({ empId });
         if (emp.isAdpt) {
           await AdoptionLeave.findOneAndDelete({ empId });
-        } else if (emp.isPaternity) {
+        }
+        if (emp.isPaternity) {
           await PaternityLeave.findOneAndDelete({ empId });
         }
       }
