@@ -4,81 +4,88 @@ const { PrivelageLeave } = require("../models/privelageLeaveSchema");
 const { PaternityLeave } = require("../models/paternityLeaveSchema");
 const { AdoptionLeave } = require("../models/adoptionLeaveModel");
 
-const processedIds = new Set(); 
-
 const initChangeStreams = () => {
-  const changeStream = EmpModel.watch([{ $match: { "operationType": "insert" } }]);
-  
+  const changeStream = EmpModel.watch([{ $match: { operationType: "insert" } }]);
+
   changeStream.on("change", async (change) => {
     try {
       const newUser = change.fullDocument;
 
-      // Ensure the event is processed only once
-      if (processedIds.has(newUser._id.toString())) {
-        console.log(`Already processed user: ${newUser._id}`);
-        return;
-      }
-      processedIds.add(newUser._id.toString());
+      console.log(`Processing new user: ${newUser.empId}`);
 
-      console.log(`Processing new user: ${newUser._id}`);
-
-      // Handle leave allocation logic
+      // Check and create Paternity Leave if applicable
       if (newUser.isPaternity) {
-        const paternity = new PaternityLeave({
-          empId: newUser.empId,
-          opBalance: 0,
-          credit: 5,
-          totalEligibility: 5,
-          closingBalance: 5,
-        });
-        await paternity.save();
+        await PaternityLeave.findOneAndUpdate(
+          { empId: newUser.empId },
+          {
+            empId: newUser.empId,
+            opBalance: 0,
+            credit: 5,
+            totalEligibility: 5,
+            closingBalance: 5,
+          },
+          { upsert: true, new: true }
+        );
       }
 
+      // Check and create Adoption Leave if applicable
       if (newUser.isAdpt) {
-        const adpt = new AdoptionLeave({
-          empId: newUser.empId,
-          opBalance: 0,
-          credit: 42,
-          totalEligibility: 42,
-          closingBalance: 42,
-        });
-        await adpt.save();
+        await AdoptionLeave.findOneAndUpdate(
+          { empId: newUser.empId },
+          {
+            empId: newUser.empId,
+            opBalance: 0,
+            credit: 42,
+            totalEligibility: 42,
+            closingBalance: 42,
+          },
+          { upsert: true, new: true }
+        );
       }
 
+      // Check and create Casual Leave and Privilege Leave based on role
       if (newUser.role === "3P") {
-        const cl = new CasualLeave({
-          empId: newUser.empId,
-          opBalance: 0,
-          credit: 12,
-          totalEligibility: 12,
-          closingBalance: 12,
-        });
-        await cl.save();
+        await CasualLeave.findOneAndUpdate(
+          { empId: newUser.empId },
+          {
+            empId: newUser.empId,
+            opBalance: 0,
+            credit: 12,
+            totalEligibility: 12,
+            closingBalance: 12,
+          },
+          { upsert: true, new: true }
+        );
       } else if (newUser.role === "GVR") {
-        const cl = new CasualLeave({
-          empId: newUser.empId,
-          opBalance: 0,
-          credit: 10,
-          totalEligibility: 10,
-          closingBalance: 10,
-        });
+        await CasualLeave.findOneAndUpdate(
+          { empId: newUser.empId },
+          {
+            empId: newUser.empId,
+            opBalance: 0,
+            credit: 10,
+            totalEligibility: 10,
+            closingBalance: 10,
+          },
+          { upsert: true, new: true }
+        );
 
-        const pl = new PrivelageLeave({
-          empId: newUser.empId,
-          opBalance: 0,
-          credit: 16,
-          totalEligibility: 16,
-          closingBalance: 16,
-          carryForward: 16,
-        });
-
-        await cl.save();
-        await pl.save();
+        await PrivelageLeave.findOneAndUpdate(
+          { empId: newUser.empId },
+          {
+            empId: newUser.empId,
+            opBalance: 0,
+            credit: 16,
+            totalEligibility: 16,
+            closingBalance: 16,
+            carryForward: 16,
+          },
+          { upsert: true, new: true }
+        );
       }
 
-      console.log(`Document processed and leave records created for user: ${newUser._id}`);
+      console.log(`Leave records created/updated for user: ${newUser.empId}`);
     } catch (error) {
-      console.error(`Error processing user: ${error.message}`);
+      console.error(`Error processing user ${change.fullDocument?.empId}: ${error.message}`);
     }
   });
 
