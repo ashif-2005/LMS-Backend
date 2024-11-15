@@ -22,7 +22,7 @@ app.use(express.urlencoded({ extended: true }));
    
 dotenv.config('./env')
 
-// initChangeStreams();
+initChangeStreams();
 
 app.use('/emp',EmpRoute)
 app.use('/leave',LeaveRoute)

@@ -5,12 +5,6 @@ const { PaternityLeave } = require("../models/paternityLeaveSchema");
 const { AdoptionLeave } = require("../models/adoptionLeaveModel");
 
 const initChangeStreams = () => {
-
-  if (streamInitialized) {
-    console.log("Change stream is already initialized.");
-    return;
-  }
-
   const changeStream = EmpModel.watch([{ $match: { operationType: "insert" } }]);
 
   changeStream.on("change", async (change) => {
