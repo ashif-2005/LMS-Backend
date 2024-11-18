@@ -65,6 +65,7 @@ const initChangeStreams = () => {
             credit: 10,
             totalEligibility: 10,
             closingBalance: 10,
+            carryForward: 10,
           },
           { upsert: true, new: true }
         );

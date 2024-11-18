@@ -44,7 +44,14 @@ const ApplyLeave = async (req, res) => {
     console.log(currentDate);
     currentDate.setDate(currentDate.getDate() + 1);
 
-    for (var i = 1; i < leaveDays-1; i++) {
+    const fromDate = parseDate(from.date);
+    const toDate = parseDate(to.date);
+
+    const differenceInTime = toDate.getTime() - fromDate.getTime();
+
+    const day = differenceInTime / (1000 * 60 * 60 * 24);
+
+    for (var i = 1; i < day; i++) {
       const formattedDate = `${String(currentDate.getDate()).padStart(
         2,
         "0"
@@ -339,6 +346,7 @@ const RejectAccepted = async (req, res) => {
         cl.availed -= leave.numberOfDays;
         cl.LOP -= leave.LOP;
         cl.closingBalance += leave.numberOfDays;
+        cl.carryForward += leave.numberOfDays;
         await cl.save();
       } else if (leave.leaveType === "Privelage Leave") {
         const pl = await PrivelageLeave.findOne({ empId: leave.empId });
@@ -530,6 +538,7 @@ const AcceptRejected = async (req, res) => {
           cl.availed += leave.numberOfDays;
           cl.LOP += leave.LOP;
           cl.closingBalance -= leave.numberOfDays;
+          cl.carryForward -= leave.numberOfDays;
           await cl.save();
         } else {
           const cl = await CasualLeave.findOne({ empId: leave.empId });
@@ -780,6 +789,7 @@ const AcceptLeave = async (req, res) => {
           cl.availed += leave.numberOfDays;
           cl.LOP += leave.LOP;
           cl.closingBalance -= leave.numberOfDays;
+          cl.carryForward -= leave.numberOfDays;
           await cl.save();
         } else {
           const cl = await CasualLeave.findOne({ empId: leave.empId });
@@ -1027,6 +1037,7 @@ const Accept = async (req, res) => {
           cl.availed += leave.numberOfDays;
           cl.LOP += leave.LOP;
           cl.closingBalance -= leave.numberOfDays;
+          cl.carryForward -= leave.numberOfDays;
           await cl.save();
         } else {
           const cl = await CasualLeave.findOne({ empId: leave.empId });
@@ -1352,7 +1363,14 @@ const checkLeave = async (req, res) => {
 
     console.log(currentDate);
 
-    for (var i = 0; i < numberOfDays; i++) {
+    const fromDate = parseDate(from.date);
+    const toDate = parseDate(to.date);
+
+    const differenceInTime = toDate.getTime() - fromDate.getTime();
+
+    const day = differenceInTime / (1000 * 60 * 60 * 24);
+
+    for (var i = 0; i < day+1; i++) {
       const formattedDate = `${String(currentDate.getDate()).padStart(
         2,
         "0"
