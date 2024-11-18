@@ -1540,6 +1540,7 @@ const weakData = async (req, res) => {
     const query = department === 'All Departments' ? {} : { department };
     const leaves = [];
 
+    // Function to parse a date string in "DD/MM/YYYY" format
     function parseDate(dateStr) {
       const [day, month, year] = dateStr.split("/").map(Number);
       return new Date(year, month - 1, day); // Month is 0-indexed in JavaScript
@@ -1547,38 +1548,29 @@ const weakData = async (req, res) => {
 
     let currentDate = parseDate(`${date}/${month}/${year}`);
 
-    for (var i = 0; i < 7; i++) {
-      const leaveSet = new Set();
-      const formattedDate = `${String(currentDate.getDate()).padStart(
-        2,
-        "0"
-      )}/${String(currentDate.getMonth() + 1).padStart(
-        2,
-        "0"
-      )}/${currentDate.getFullYear()}`;
-      const from = await LeaveModel.find({
-        status: "Approved",
-        department: query,
-        "from.date": formattedDate,
-      });
-      const to = await LeaveModel.find({
-        status: "Approved",
-        department: query,
-        "to.date": formattedDate,
-      });
-      const between = await LeaveModel.find({
-        status: "Approved",
-        department: query,
-        days: { $in: formattedDate },
-      });
+    for (let i = 0; i < 7; i++) {
+      const formattedDate = `${String(currentDate.getDate()).padStart(2, '0')}/${String(currentDate.getMonth() + 1).padStart(2, '0')}/${currentDate.getFullYear()}`;
 
-      from.forEach((leave) => leaveSet.add(String(leave._id)));
-      to.forEach((leave) => leaveSet.add(String(leave._id)));
-      between.forEach((leave) => leaveSet.add(String(leave._id)));
+      // Using $or to combine conditions
+      const leavesForDay = await LeaveModel.find({
+        status: 'Approved',
+        ...query,
+        $or: [
+          { "from.date": formattedDate },
+          { "to.date": formattedDate },
+          { days: { $in: [formattedDate] } }
+        ]
+      }).select('_id'); // Only get the `_id` field
 
-      leaves.push(leaveSet.size);
+      // Getting unique leave IDs using `Set`
+      const uniqueLeaveIds = new Set(leavesForDay.map(leave => leave._id.toString()));
+      leaves.push(uniqueLeaveIds.size);
+
+      // Decrementing date by 1
       currentDate.setDate(currentDate.getDate() - 1);
     }
+
+    // Returning the response with the data
     res.status(200).json({ weekData: leaves });
   } catch (err) {
     res.status(500).json({ message: "Server error", err });
