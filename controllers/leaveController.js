@@ -34,18 +34,24 @@ const ApplyLeave = async (req, res) => {
     var list = [];
 
     function parseDate(dateStr) {
-      const [day, month, year] = dateStr.split('/').map(Number);
+      const [day, month, year] = dateStr.split("/").map(Number);
       return new Date(year, month - 1, day); // Month is 0-indexed in JavaScript
     }
-  
+
     // Parse the input dates
     let currentDate = parseDate(from.date);
 
     console.log(currentDate);
     currentDate.setDate(currentDate.getDate() + 1);
 
-    for(var i = 1; i < leaveDays-1; i++) {
-      const formattedDate = `${String(currentDate.getDate()).padStart(2, '0')}/${String(currentDate.getMonth() + 1).padStart(2, '0')}/${currentDate.getFullYear()}`;
+    for (var i = 1; i < leaveDays-1; i++) {
+      const formattedDate = `${String(currentDate.getDate()).padStart(
+        2,
+        "0"
+      )}/${String(currentDate.getMonth() + 1).padStart(
+        2,
+        "0"
+      )}/${currentDate.getFullYear()}`;
       list.push(formattedDate);
 
       currentDate.setDate(currentDate.getDate() + 1);
@@ -1337,18 +1343,23 @@ const checkLeave = async (req, res) => {
     var list = [];
 
     function parseDate(dateStr) {
-      const [day, month, year] = dateStr.split('/').map(Number);
-      return new Date(year, month - 1, day); // Month is 0-indexed in JavaScript
+      const [day, month, year] = dateStr.split("/").map(Number);
+      return new Date(year, month - 1, day);
     }
-  
+
     // Parse the input dates
     let currentDate = parseDate(from.date);
 
     console.log(currentDate);
-    
 
-    for(var i = 0; i < numberOfDays; i++) {
-      const formattedDate = `${String(currentDate.getDate()).padStart(2, '0')}/${String(currentDate.getMonth() + 1).padStart(2, '0')}/${currentDate.getFullYear()}`;
+    for (var i = 0; i < numberOfDays; i++) {
+      const formattedDate = `${String(currentDate.getDate()).padStart(
+        2,
+        "0"
+      )}/${String(currentDate.getMonth() + 1).padStart(
+        2,
+        "0"
+      )}/${currentDate.getFullYear()}`;
       list.push(formattedDate);
 
       currentDate.setDate(currentDate.getDate() + 1);
@@ -1501,21 +1512,45 @@ const cardData = async (req, res) => {
 const weakData = async (req, res) => {
   try {
     const { empId } = req.body;
-    console.log(`${year}/${month}/${date}`);
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    const YYYY = sevenDaysAgo.getFullYear();
-    const MM = String(sevenDaysAgo.getMonth() + 1).padStart(2, "0");
-    const DD = String(sevenDaysAgo.getDate()).padStart(2, "0");
-    const employee = await EmpModel.findOne({ empId });
-    const leaves = await LeaveModel.find({
-      today: {
-        $gte: `${YYYY}/${MM}/${DD}`,
-        $lte: `${year}/${month}/${date}`,
-      },
-      manager: employee.userName,
-    });
-    res.status(200).json(leaves);
+    const leaves = [];
+
+    function parseDate(dateStr) {
+      const [day, month, year] = dateStr.split("/").map(Number);
+      return new Date(year, month - 1, day); // Month is 0-indexed in JavaScript
+    }
+
+    let currentDate = parseDate(`${date}/${month}/${year}`);
+
+    for (var i = 0; i < 7; i++) {
+      const leaveSet = new Set();
+      const formattedDate = `${String(currentDate.getDate()).padStart(
+        2,
+        "0"
+      )}/${String(currentDate.getMonth() + 1).padStart(
+        2,
+        "0"
+      )}/${currentDate.getFullYear()}`;
+      const from = await LeaveModel.find({
+        status: "Approved",
+        "from.date": formattedDate,
+      });
+      const to = await LeaveModel.find({
+        status: "Approved",
+        "to.date": formattedDate,
+      });
+      const between = await LeaveModel.find({
+        status: "Approved",
+        days: { $in: formattedDate },
+      });
+
+      from.forEach((leave) => leaveSet.add(String(leave._id)));
+      to.forEach((leave) => leaveSet.add(String(leave._id)));
+      between.forEach((leave) => leaveSet.add(String(leave._id)));
+
+      leaves.push(leaveSet.size);
+      currentDate.setDate(currentDate.getDate() - 1);
+    }
+    res.status(200).json({ weekData: leaves });
   } catch (err) {
     res.status(500).json({ message: "Server error", err });
   }
