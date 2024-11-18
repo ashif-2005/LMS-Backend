@@ -99,6 +99,7 @@ const ApplyLeave = async (req, res) => {
           empName: emp.empName,
           role: emp.role,
           manager: emp.managerId,
+          department: emp.department,
           leaveType,
           from,
           to,
@@ -119,6 +120,7 @@ const ApplyLeave = async (req, res) => {
           empName: emp.empName,
           role: emp.role,
           manager: emp.managerId,
+          department: emp.department,
           leaveType,
           from,
           to,
@@ -139,6 +141,7 @@ const ApplyLeave = async (req, res) => {
           empName: emp.empName,
           role: emp.role,
           manager: emp.managerId,
+          department: emp.department,
           leaveType,
           from,
           to,
@@ -166,6 +169,7 @@ const ApplyLeave = async (req, res) => {
           empName: emp.empName,
           role: emp.role,
           manager: emp.managerId,
+          department: emp.department,
           leaveType,
           from,
           to,
@@ -187,6 +191,7 @@ const ApplyLeave = async (req, res) => {
             empName: emp.empName,
             role: emp.role,
             manager: emp.managerId,
+            department: emp.department,
             leaveType,
             from,
             to,
@@ -210,6 +215,7 @@ const ApplyLeave = async (req, res) => {
           empName: emp.empName,
           role: emp.role,
           manager: emp.managerId,
+          department: emp.department,
           leaveType,
           from,
           to,
@@ -231,6 +237,7 @@ const ApplyLeave = async (req, res) => {
           empName: emp.empName,
           role: emp.role,
           manager: emp.managerId,
+          department: emp.department,
           leaveType,
           from,
           to,
@@ -1529,7 +1536,8 @@ const cardData = async (req, res) => {
 
 const weakData = async (req, res) => {
   try {
-    const { empId } = req.body;
+    const { empId, department } = req.body;
+    const query = department === 'All Departments' ? {} : { department };
     const leaves = [];
 
     function parseDate(dateStr) {
@@ -1550,14 +1558,17 @@ const weakData = async (req, res) => {
       )}/${currentDate.getFullYear()}`;
       const from = await LeaveModel.find({
         status: "Approved",
+        department: query,
         "from.date": formattedDate,
       });
       const to = await LeaveModel.find({
         status: "Approved",
+        department: query,
         "to.date": formattedDate,
       });
       const between = await LeaveModel.find({
         status: "Approved",
+        department: query,
         days: { $in: formattedDate },
       });
 
