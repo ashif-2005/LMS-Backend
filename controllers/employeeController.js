@@ -192,6 +192,7 @@ const Login = async (req, res) => {
         empName: employee.empName,
         empMail: employee.empMail,
         managerMail: employee.reportingManager,
+        userName: employee.userName
       },
       process.env.SECRET,
       { expiresIn: "1h" }
@@ -220,6 +221,7 @@ const RFIDLogin = async (req, res) => {
         empName: employee.empName,
         empMail: employee.empMail,
         managerMail: employee.reportingManager,
+        userName: employee.userName
       },
       process.env.SECRET,
       { expiresIn: "1h" }
