@@ -60,14 +60,16 @@ const schema = new db.Schema(
       default: "Personal",
     },
     reason: {
-      type: String,
-      required: true,
+      type: String
     },
     status: {
       type: String,
       required: true,
       enum: ["Pending", "Approved", "Denied", "Withdrawn"],
       default: "Pending",
+    },
+    rejectReason: {
+      type: String
     },
     today: {
       type: String,

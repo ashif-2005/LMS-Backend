@@ -286,7 +286,7 @@ const withDrawLeave = async (req, res) => {
 
 const RejectAccepted = async (req, res) => {
   try {
-    const { empId, leaveId } = req.body;
+    const { empId, leaveId, rejectReason } = req.body;
     console.log(leaveId);
     const leave = await LeaveModel.findById(leaveId);
     const emp = await EmpModel.findOne({ empId });
@@ -382,10 +382,11 @@ const RejectAccepted = async (req, res) => {
         await cl.save();
       }
       leave.status = "Denied";
+      leave.rejectReason = rejectReason;
       await leave.save();
       Message(
         emp.empPhone,
-        `Dear ${emp.empName},\n\nYour leave has been *REJECTED* ❌.\n*Leave Type:* ${leave.leaveType}\n*Start Date:* ${leave.from.date}\n*Number of Days:* ${leave.numberOfDays}\n\nPlease ensure that all pending tasks are handed over to the appropriate team members before your leave.\n\nBest Regards,\n*Gilbarco Veeder-Root*`
+        `Dear ${emp.empName},\n\nYour leave has been *REJECTED* ❌.\n*Leave Type:* ${leave.leaveType}\n*Start Date:* ${leave.from.date}\n*Number of Days:* ${leave.numberOfDays}\n\nReason: ${rejectReason}.\n\nBest Regards,\n*Gilbarco Veeder-Root*`
       );
       res.status(200).json({ message: "Leave status updated successfully" });
     } else {
@@ -1179,7 +1180,7 @@ const DenyLeave = async (req, res) => {
 
 const Deny = async (req, res) => {
   try {
-    const { leaveId } = req.body;
+    const { leaveId, rejectReason } = req.body;
 
     const leave = await LeaveModel.findById(leaveId);
     if (!leave) {
@@ -1193,13 +1194,14 @@ const Deny = async (req, res) => {
       res.status(202).json({ message: "Already Withdrawn" });
     } else {
       leave.status = "Denied";
+      leave.rejectReason = rejectReason;
       await leave.save();
       const emp = await EmpModel.findOne({ empId: leave.empId });
       console.log(emp.empMail);
-      Rejected("mohammedashif.a2022cse@sece.ac.in");
+      Rejected(`${emp.empMail}`);
       Message(
         emp.empPhone,
-        `Dear ${emp.empName},\n\nYour leave has been *REJECTED* ❌.\n*Leave Type:* ${leave.leaveType}\n*Start Date:* ${leave.from.date}\n*Number of Days:* ${leave.numberOfDays}\n\nPlease ensure that all pending tasks are handed over to the appropriate team members before your leave.\n\nBest Regards,\n*Gilbarco Veeder-Root*`
+        `Dear ${emp.empName},\n\nYour leave has been *REJECTED* ❌.\n*Leave Type:* ${leave.leaveType}\n*Start Date:* ${leave.from.date}\n*Number of Days:* ${leave.numberOfDays}\n\nReason: ${rejectReason}.\n\nBest Regards,\n*Gilbarco Veeder-Root*`
       );
       res.status(200).json({ message: "Leave denied successfully", leave });
     }
