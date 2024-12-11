@@ -72,6 +72,10 @@ const schema = new db.Schema(
             type: String,
             required: true
         },
+        subDepartment: {
+            type: String,
+            required: true
+        },
         level: {
             type: String,
             required: true
