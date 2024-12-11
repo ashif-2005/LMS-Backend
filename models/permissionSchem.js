@@ -23,6 +23,15 @@ const schema = new db.Schema(
             type: String,
             required: true
         },
+        unit: {
+            type: String,
+            required: true
+        },
+        gender: {
+            type: String,
+            enum: ['Male', 'Female', 'Other'],
+            required: true
+        },
         date:{
             type: String,
             required: true
