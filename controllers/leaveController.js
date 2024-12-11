@@ -100,6 +100,7 @@ const ApplyLeave = async (req, res) => {
           role: emp.role,
           manager: emp.managerId,
           department: emp.department,
+          subDepartment: emp.subDepartment,
           leaveType,
           from,
           to,
@@ -1544,8 +1545,13 @@ const cardData = async (req, res) => {
 
 const weakData = async (req, res) => {
   try {
-    const { empId, department } = req.body;
-    const query = department === 'All Departments' ? {} : { department };
+    const { empId, department, subDepartment, unit, gender } = req.body;
+    const query = {
+      ...(department && department !== 'All Departments' && { department }),
+      ...(unit && unit !== 'All Units' && { unit }),
+      ...(subDepartment && subDepartment !== 'All SubDepartments' && { subDepartment }),
+      ...(gender && gender !== 'All Genders' && { gender }),
+    }
     const leaves = [];
 
     // Function to parse a date string in "DD/MM/YYYY" format
