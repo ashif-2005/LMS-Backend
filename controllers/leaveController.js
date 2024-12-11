@@ -1563,8 +1563,8 @@ const weakData = async (req, res) => {
     const query = {
       ...(department && department !== 'All Departments' && { department }),
       ...(unit && unit !== 'All Units' && { unit }),
-      ...(subDepartment && subDepartment !== 'All SubDepartments' && { subDepartment }),
-      ...(gender && gender !== 'All Genders' && { gender }),
+      ...(subDepartment && subDepartment !== 'All Sub Departments' && { subDepartment }),
+      ...(gender && gender !== 'All Gender' && { gender }),
     }
     const leaves = [];
 
