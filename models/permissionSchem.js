@@ -15,6 +15,14 @@ const schema = new db.Schema(
             enum: ['Admin', 'Manager', '3P', 'GVR'],
             default: '3P'
         },
+        department: {
+            type: String,
+            required: true
+        },
+        subDepartment: {
+            type: String,
+            required: true
+        },
         date:{
             type: String,
             required: true

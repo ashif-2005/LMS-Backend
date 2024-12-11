@@ -19,6 +19,8 @@ const ApplyPermission = async (req, res) => {
                 empId,
                 empName: emp.empName,
                 role: emp.role,
+                department: emp.department,
+                subDepartment: emp.subDepartment,
                 date,
                 from,
                 to,
