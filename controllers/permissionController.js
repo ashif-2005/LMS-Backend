@@ -190,6 +190,7 @@ const DenyPermission = async (req, res) => {
         const { permissionId } = req.params;
 
         const permission = await PermissionModel.findById(permissionId);
+        const emp = await EmpModel.findOne({empId: permission.empId});
         if (!permission) {
             return res.status(404).json({ message: 'Permission not found' });
         }
@@ -224,6 +225,7 @@ const Deny = async (req, res) => {
         const { permissionId } = req.body;
 
         const permission = await PermissionModel.findById(permissionId);
+        const emp = await EmpModel.findOne({empId: permission.empId});
         if (!permission) {
             return res.status(404).json({ message: 'Permission not found' });
         }
